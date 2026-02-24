@@ -77,8 +77,8 @@ layer by layer. Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md
 ```bash
 git clone https://github.com/ToluPeazy/cipherrescue.git
 cd cipherrescue
-python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Linux / macOS
+.venv\Scripts\activate           # Windows PowerShell
 pip install -e ".[dev]"
 ```
 
