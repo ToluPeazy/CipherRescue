@@ -1,0 +1,81 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+
+# ── Type stubs ────────────────────────────────────────────────────────────────
+*.pyi
+
+# ── Build artefacts ───────────────────────────────────────────────────────────
+*.iso
+*.img
+*.qcow2
+*.vmdk
+*.ova
+cipherrescue.iso
+cipherrescue-*.iso
+
+# ── Secrets and credentials — NEVER commit these ──────────────────────────────
+*.key
+*.pem
+*.p12
+*.pfx
+*.asc
+*.gpg
+secrets/
+.env
+.env.*
+credentials.json
+recovery_key.txt
+
+# ── IDE / editor ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── LaTeX (spec documents) ────────────────────────────────────────────────────
+docs/spec/*.aux
+docs/spec/*.log
+docs/spec/*.bbl
+docs/spec/*.blg
+docs/spec/*.toc
+docs/spec/*.out
+docs/spec/*.lof
+docs/spec/*.lot
+docs/spec/*.fls
+docs/spec/*.fdb_latexmk
+docs/spec/*.synctex.gz
+
+# ── ONNX / ML model artefacts ─────────────────────────────────────────────────
+*.onnx
+models/
+!models/.gitkeep
+
+# ── Test drive images (never commit real device data) ─────────────────────────
+testdata/*.img
+testdata/*.bin
+testdata/*.raw
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+.dockerignore

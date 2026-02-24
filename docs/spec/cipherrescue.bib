@@ -1,0 +1,386 @@
+% ============================================================
+% cipherrescue.bib
+% CipherRescue: Comprehensive Technical Specification
+% BibTeX Bibliography
+% ============================================================
+
+% ── PRIMARY SCPR LINEAGE ────────────────────────────────────
+
+@article{sadeghimanesh2022smt,
+  author    = {Sadeghimanesh, AmirHosein and England, Matthew},
+  title     = {An {SMT} Solver for Non-Linear Real Arithmetic inside {Maple}},
+  journal   = {{ACM} Communications in Computer Algebra},
+  volume    = {56},
+  number    = {2},
+  pages     = {76--79},
+  year      = {2022},
+  doi       = {10.1145/3572867.3572880},
+  note      = {Genesis of the SCPR; coins the term ``Set Covering Problem with Reasons''.}
+}
+
+@phdthesis{babatunde2025thesis,
+  author    = {Babatunde, Abiola Tolulope},
+  title     = {Introducing and Analysing the {Set Covering Problem with Reasons}},
+  school    = {Coventry University},
+  year      = {2025},
+  note      = {First full formalisation of SCPR; generalised Beasley reduction process;
+               first public SCPR benchmark dataset; applications to CDCAC and FEA.}
+}
+
+@unpublished{babatunde2026arxiv,
+  author    = {Babatunde, Abiola Tolulope and England, Matthew and Sadeghimanesh, AmirHosein},
+  title     = {Optimising Cylindrical Algebraic Coverings for Use in {SMT} by
+               Solving a {Set Covering Problem with Reasons}},
+  year      = {2026},
+  note      = {arXiv:2601.14424. Submitted to \textit{Journal of Discrete Optimisation}
+               (Elsevier). Beasley reduction solves 95.5\% of CDCAC-derived instances;
+               LP solves remainder in $<$1\,ms.}
+}
+
+@misc{babatunde2025zenodo,
+  author       = {Babatunde, Abiola Tolulope},
+  title        = {Supplementary Files for {SCPR}},
+  year         = {2025},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.15326494},
+  howpublished = {Zenodo dataset. \url{https://doi.org/10.5281/zenodo.15326494}}
+}
+
+% ── SET COVER FOUNDATIONS ───────────────────────────────────
+
+@incollection{karp1972,
+  author    = {Karp, Richard M.},
+  title     = {Reducibility Among Combinatorial Problems},
+  booktitle = {Complexity of Computer Computations},
+  editor    = {Miller, Raymond E. and Thatcher, James W.},
+  pages     = {85--103},
+  publisher = {Springer},
+  year      = {1972},
+  doi       = {10.1007/978-1-4684-2001-2_9}
+}
+
+@article{beasley1987,
+  author    = {Beasley, John E.},
+  title     = {An Algorithm for Set Covering Problem},
+  journal   = {European Journal of Operational Research},
+  volume    = {31},
+  number    = {1},
+  pages     = {85--93},
+  year      = {1987},
+  doi       = {10.1016/0377-2217(87)90008-5}
+}
+
+@article{beasley1990,
+  author    = {Beasley, John E.},
+  title     = {A {Lagrangian} Heuristic for Set-Covering Problems},
+  journal   = {Naval Research Logistics},
+  volume    = {37},
+  number    = {1},
+  pages     = {151--164},
+  year      = {1990},
+  doi       = {10.1002/nav.3800370110}
+}
+
+@book{vazirani2001,
+  author    = {Vazirani, Vijay V.},
+  title     = {Approximation Algorithms},
+  publisher = {Springer-Verlag},
+  year      = {2001},
+  isbn      = {978-3-540-65367-7}
+}
+
+% ── ENCRYPTION SCHEME SPECIFICATIONS ────────────────────────
+
+@techreport{ferguson2006,
+  author      = {Ferguson, Niels},
+  title       = {{AES-CBC} + {Elephant} Diffuser: A Disk Encryption Algorithm
+                 for {Windows Vista}},
+  institution = {Microsoft},
+  year        = {2006}
+}
+
+@techreport{broz2018,
+  author      = {Broz, Milan and Matyas, Vashek},
+  title       = {{LUKS2} On-Disk Format Specification v1.0},
+  institution = {cryptsetup Project},
+  year        = {2018}
+}
+
+@techreport{tcg2015,
+  author      = {{Trusted Computing Group}},
+  title       = {{TCG} Storage Architecture Core Specification v2.01},
+  institution = {Trusted Computing Group},
+  year        = {2015}
+}
+
+@techreport{menz2023,
+  author      = {Menz, Christian and others},
+  title       = {{VeraCrypt} Technical Specification},
+  institution = {VeraCrypt Project},
+  year        = {2023}
+}
+
+% ── DISK FORENSICS AND EVIDENCE ─────────────────────────────
+
+@book{casey2011,
+  author    = {Casey, Eoghan},
+  title     = {Digital Evidence and Computer Crime},
+  edition   = {3},
+  publisher = {Academic Press},
+  year      = {2011},
+  isbn      = {978-0-12-374268-1}
+}
+
+@article{garfinkel2012,
+  author    = {Garfinkel, Simson L.},
+  title     = {Digital Forensics {XML} and the {DFXML} Project},
+  journal   = {Digital Investigation},
+  volume    = {8},
+  number    = {3--4},
+  pages     = {161--174},
+  year      = {2012},
+  doi       = {10.1016/j.diin.2011.11.002}
+}
+
+@book{ligh2014,
+  author    = {Ligh, Michael Hale and Case, Andrew and Levy, Jamie and Walters, Aaron},
+  title     = {The Art of Memory Forensics},
+  publisher = {Wiley},
+  year      = {2014},
+  isbn      = {978-1-118-82509-9}
+}
+
+@inproceedings{harbawi2017,
+  author    = {Harbawi, Malek and Varol, Asaf},
+  title     = {An Improved Digital Evidence Acquisition Model for the {Internet of Things}
+               Forensic {I}: A Theoretical Framework},
+  booktitle = {2017 5th International Symposium on Digital Forensic and Security (ISDFS)},
+  pages     = {1--6},
+  year      = {2017},
+  publisher = {IEEE},
+  doi       = {10.1109/ISDFS.2017.7916508}
+}
+
+@inproceedings{poisel2013,
+  author    = {Poisel, Rainer and Tjoa, Simon},
+  title     = {Forensics of Encrypted and Compressed {Linux} Filesystems},
+  booktitle = {2013 Eighth International Conference on Availability, Reliability and Security},
+  pages     = {442--451},
+  year      = {2013},
+  publisher = {IEEE},
+  doi       = {10.1109/ARES.2013.58}
+}
+
+% ── STORAGE FAILURE DETECTION ───────────────────────────────
+
+@inproceedings{pinheiro2007,
+  author    = {Pinheiro, Eduardo and Weber, Wolf-Dietrich and Barroso, Luiz Andr{\'{e}}},
+  title     = {Failure Trends in a Large Disk Drive Population},
+  booktitle = {Proceedings of the 5th {USENIX} Conference on File and Storage Technologies
+               ({FAST}'07)},
+  pages     = {17--28},
+  year      = {2007},
+  publisher = {{USENIX} Association}
+}
+
+@misc{backblaze2024,
+  author       = {{Backblaze}},
+  title        = {Hard Drive {SMART} Stats Dataset 2014--2024},
+  year         = {2024},
+  howpublished = {\url{https://www.backblaze.com/b2/hard-drive-test-data.html}},
+  note         = {Accessed February 2025}
+}
+
+@inproceedings{botezatu2016,
+  author    = {Botezatu, Mirela Madalina and Giurgiu, Ioana and Bogojeska, Jasmina
+               and Wiesmann, Dorothea},
+  title     = {Predicting Disk Replacement towards Reliable Data Centers},
+  booktitle = {Proceedings of the 22nd {ACM} {SIGKDD} International Conference on
+               Knowledge Discovery and Data Mining},
+  pages     = {39--48},
+  year      = {2016},
+  doi       = {10.1145/2939672.2939737}
+}
+
+@article{murray2022,
+  author    = {Murray, James F. and others},
+  title     = {Improving Disk Failure Predictions with Conformal Prediction},
+  journal   = {{IEEE} Transactions on Dependable and Secure Computing},
+  year      = {2022},
+  doi       = {10.1109/TDSC.2021.3104905}
+}
+
+% ── MODEL-BASED DIAGNOSIS ───────────────────────────────────
+
+@article{reiter1987,
+  author    = {Reiter, Raymond},
+  title     = {A Theory of Diagnosis from First Principles},
+  journal   = {Artificial Intelligence},
+  volume    = {32},
+  number    = {1},
+  pages     = {57--95},
+  year      = {1987},
+  doi       = {10.1016/0004-3702(87)90062-6}
+}
+
+@article{dekleer1987,
+  author    = {de Kleer, Johan and Williams, Brian C.},
+  title     = {Diagnosing Multiple Faults},
+  journal   = {Artificial Intelligence},
+  volume    = {32},
+  number    = {1},
+  pages     = {97--130},
+  year      = {1987},
+  doi       = {10.1016/0004-3702(87)90063-8}
+}
+
+@inproceedings{struss1989,
+  author    = {Struss, Peter and Dressler, Oskar},
+  title     = {``Physical Negation'' --- Integrating Fault Models into the General
+               Diagnostic Engine},
+  booktitle = {Proceedings of the 11th International Joint Conference on Artificial
+               Intelligence ({IJCAI}'89)},
+  pages     = {1318--1323},
+  year      = {1989}
+}
+
+@inproceedings{console1991,
+  author    = {Console, Luca and Dupre, Daniele Theseider and Torasso, Pietro},
+  title     = {On the Relationship Between Abduction and Deduction},
+  booktitle = {Proceedings of the 12th International Joint Conference on Artificial
+               Intelligence ({IJCAI}'91)},
+  pages     = {1041--1046},
+  year      = {1991}
+}
+
+@article{genesereth1984,
+  author    = {Genesereth, Michael R.},
+  title     = {The Use of Design Descriptions in Automated Diagnosis},
+  journal   = {Artificial Intelligence},
+  volume    = {24},
+  number    = {1--3},
+  pages     = {411--436},
+  year      = {1984},
+  doi       = {10.1016/0004-3702(84)90047-6}
+}
+
+% ── SCPR-ADJACENT FORMALISMS ─────────────────────────────────
+
+@inproceedings{liffiton2016,
+  author    = {Liffiton, Mark H. and Malik, Ammar},
+  title     = {Enumerating Infeasibility: Finding Multiple {MUSes} Quickly},
+  booktitle = {Integration of {AI} and {OR} Techniques in Constraint Programming
+               ({CPAIOR} 2016)},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {9676},
+  pages     = {160--175},
+  year      = {2016},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-319-33954-2_12}
+}
+
+@inproceedings{ignatiev2019,
+  author    = {Ignatiev, Alexey and Narodytska, Nina and Marques-Silva, Joao},
+  title     = {Abduction-Based Explanations for Machine Learning Models},
+  booktitle = {Proceedings of the Thirty-Third {AAAI} Conference on Artificial
+               Intelligence ({AAAI-19})},
+  pages     = {1511--1519},
+  year      = {2019},
+  doi       = {10.1609/aaai.v33i01.33011511}
+}
+
+@inproceedings{marquessilva2021,
+  author    = {Marques-Silva, Joao and Gerspacher, Thomas and Cooper, Martin C.
+               and Ignatiev, Alexey and Narodytska, Nina},
+  title     = {Explanations for Monotone Classifiers},
+  booktitle = {Proceedings of the 27th International Conference on Principles and
+               Practice of Constraint Programming ({CP} 2021)},
+  year      = {2021},
+  doi       = {10.4230/LIPIcs.CP.2021.40}
+}
+
+@inproceedings{davies2013,
+  author    = {Davies, Jessica and Bacchus, Fahiem},
+  title     = {Exploiting the Power of {MIP} Solvers in {MAXSAT}},
+  booktitle = {Theory and Applications of Satisfiability Testing ({SAT} 2013)},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {7962},
+  pages     = {166--181},
+  year      = {2013},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-39071-5_13}
+}
+
+@inproceedings{cimatti2021,
+  author    = {Cimatti, Alessandro and Griggio, Alberto and Tonetta, Stefano},
+  title     = {Formal Explanations for {SMT} and {IC3}},
+  booktitle = {2021 36th Annual {ACM/IEEE} Symposium on Logic in Computer Science
+               ({LICS})},
+  pages     = {1--14},
+  year      = {2021},
+  publisher = {IEEE},
+  doi       = {10.1109/LICS52264.2021.9470572}
+}
+
+% ── BIOINFORMATICS / FEA ─────────────────────────────────────
+
+@article{subramanian2005,
+  author    = {Subramanian, Aravind and Tamayo, Pablo and Mootha, Vamsi K.
+               and Mukherjee, Sayan and Ebert, Benjamin L. and Gillette, Michael A.
+               and Paulovich, Amanda and Pomeroy, Scott L. and Golub, Todd R.
+               and Lander, Eric S. and Mesirov, Jill P.},
+  title     = {Gene Set Enrichment Analysis: A Knowledge-Based Approach for Interpreting
+               Genome-Wide Expression Profiles},
+  journal   = {Proceedings of the National Academy of Sciences},
+  volume    = {102},
+  number    = {43},
+  pages     = {15545--15550},
+  year      = {2005},
+  doi       = {10.1073/pnas.0506580102}
+}
+
+@article{eden2009,
+  author    = {Eden, Eran and Navon, Roy and Steinfeld, Israel and Lipson, Doron
+               and Yakhini, Zohar},
+  title     = {{GOrilla}: A Tool for Discovery and Visualization of Enriched {GO}
+               Terms in Ranked Gene Lists},
+  journal   = {{BMC} Bioinformatics},
+  volume    = {10},
+  pages     = {48},
+  year      = {2009},
+  doi       = {10.1186/1471-2105-10-48}
+}
+
+@article{huang2009,
+  author    = {Huang, Da Wei and Sherman, Brad T. and Lempicki, Richard A.},
+  title     = {Bioinformatics Enrichment Tools: Paths Toward the Comprehensive
+               Functional Analysis of Large Gene Lists},
+  journal   = {Nucleic Acids Research},
+  volume    = {37},
+  number    = {1},
+  pages     = {1--13},
+  year      = {2009},
+  doi       = {10.1093/nar/gkn923}
+}
+
+% ── SYSTEMATIC REVIEW METHODOLOGY ───────────────────────────
+
+@article{page2021,
+  author    = {Page, Matthew J. and McKenzie, Joanne E. and Bossuyt, Patrick M.
+               and Boutron, Isabelle and Hoffmann, Tammy C. and Mulrow, Cynthia D.
+               and Shamseer, Larissa and Tetzlaff, Jennifer M. and Akl, Elie A.
+               and Brennan, Sue E. and Chou, Roger and Glanville, Julie
+               and Grimshaw, Jeremy M. and Hr{\'o}bjartsson, Asbj{\o}rn
+               and Lalu, Manoj M. and Li, Tianjing and Loder, Elizabeth W.
+               and Mayo-Wilson, Evan and McDonald, Steve and McGuinness, Luke A.
+               and Stewart, Lesley A. and Thomas, James and Tricco, Andrea C.
+               and Welch, Vivian A. and Whiting, Penny and Moher, David},
+  title     = {The {PRISMA} 2020 Statement: An Updated Guideline for Reporting
+               Systematic Reviews},
+  journal   = {{PLOS} Medicine},
+  volume    = {18},
+  number    = {3},
+  pages     = {e1003583},
+  year      = {2021},
+  doi       = {10.1371/journal.pmed.1003583}
+}
