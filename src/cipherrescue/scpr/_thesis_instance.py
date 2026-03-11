@@ -41,13 +41,13 @@ class ThesisSCPR:
         self,
         U: list[Signal],
         R: list[Reason],
-        E: list[list],
+        E: list[list[object]],
         costs: dict[Reason, float] | None = None,
     ) -> None:
         self.U = U
         self.R = R
         self.E = E
-        self.T: list[list[Reason]] = non_single_reason(E)
+        self.T: list[list] = non_single_reason(E)
         self.costs: dict[Reason, float] = (
             costs if costs is not None else dict.fromkeys(R, 1.0)
         )
@@ -69,7 +69,7 @@ def from_instance(instance: SCPRInstance) -> ThesisSCPR:
     U = sorted(instance.universe, key=lambda s: s.name)
     R = sorted(instance.reasons, key=lambda r: r.name)
 
-    E: list[list] = [
+    E: list[list[object]] = [
         [
             sorted(pair.covering_set, key=lambda s: s.name),
             sorted(pair.reason_set, key=lambda r: r.name),

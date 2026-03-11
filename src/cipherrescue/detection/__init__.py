@@ -61,7 +61,7 @@ class DetectionResult:
 
     device_path: str
     signals: frozenset[Signal] = field(default_factory=frozenset)
-    raw_smart: dict = field(default_factory=dict)
+    raw_smart: dict[str, object] = field(default_factory=dict)
     scheme_hint: str = ""  # 'luks2' | 'bitlocker' | 'veracrypt' | 'opal' | ''
     errors: list[str] = field(default_factory=list)
 
@@ -122,7 +122,7 @@ class DetectionEngine:
 
     # ── Extractors (stubs) ───────────────────────────────────────────────
 
-    def _extract_smart(self, device_path: str) -> tuple[set[Signal], dict]:
+    def _extract_smart(self, device_path: str) -> tuple[set[Signal], dict[str, object]]:
         """
         Parse SMART attributes via smartctl --json.
 

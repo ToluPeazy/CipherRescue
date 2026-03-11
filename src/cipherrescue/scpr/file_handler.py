@@ -162,7 +162,7 @@ def load_benchmark_instance(
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def SCPR_reader_pkl(file_name) -> tuple:
+def SCPR_reader_pkl(file_name) -> tuple[list, list, list]:
     """
     Read a thesis benchmark .pkl file.
 

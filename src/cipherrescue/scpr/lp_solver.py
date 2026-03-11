@@ -118,7 +118,7 @@ class ILPResult:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def _build_system(A: ThesisSCPR) -> tuple[list, list, list]:
+def _build_system(A: ThesisSCPR) -> tuple[list[float], list[list[float]], list[float]]:
     """
     Build (c, Aub, Bub) for the linearised SCPR optimisation.
 

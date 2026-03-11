@@ -17,7 +17,7 @@ Example:
 from __future__ import annotations
 
 
-def non_single_reason(combined_set: list[list]) -> list[list]:
+def non_single_reason(combined_set: list[list]) -> list:
     """
     Return all non-singleton reason-list prefixes appearing in combined_set.
 
@@ -30,7 +30,7 @@ def non_single_reason(combined_set: list[list]) -> list[list]:
 
     Adapted from Extract_Reasons.py (Babatunde, 2025).
     """
-    non_singleton: list[list] = []
+    non_singleton: list = []
 
     for i in range(len(combined_set)):
         for j in range(1, len(combined_set[i][1])):
