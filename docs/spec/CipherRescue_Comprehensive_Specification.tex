@@ -1,0 +1,1844 @@
+\documentclass[11pt,a4paper]{report}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{palatino}
+\usepackage{mathpazo}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage[skins,breakable,theorems]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{parskip}
+\usepackage[round,authoryear,sort&compress]{natbib}
+
+% ── Colour Palette ────────────────────────────────────────────────────────────
+\definecolor{navyblue}{RGB}{27,42,74}
+\definecolor{royalblue}{RGB}{46,95,163}
+\definecolor{lightblue}{RGB}{214,228,247}
+\definecolor{tealgreen}{RGB}{26,107,114}
+\definecolor{lightteal}{RGB}{208,236,238}
+\definecolor{amber}{RGB}{179,89,0}
+\definecolor{lightamber}{RGB}{255,240,214}
+\definecolor{crimson}{RGB}{139,26,26}
+\definecolor{lightred}{RGB}{249,222,222}
+\definecolor{forestgreen}{RGB}{26,92,46}
+\definecolor{lightgreen}{RGB}{214,240,224}
+\definecolor{purple}{RGB}{75,0,130}
+\definecolor{lightpurple}{RGB}{237,231,246}
+\definecolor{darkgrey}{RGB}{74,74,74}
+\definecolor{lightgrey}{RGB}{240,240,240}
+\definecolor{midgrey}{RGB}{180,180,180}
+
+% ── tcolorbox styles ──────────────────────────────────────────────────────────
+
+\tcbset{
+  defstyle/.style={
+    enhanced, breakable,
+    colback=lightblue!40, colframe=royalblue,
+    fonttitle=\bfseries\color{navyblue},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  thmstyle/.style={
+    enhanced, breakable,
+    colback=lightpurple!50, colframe=purple,
+    fonttitle=\bfseries\color{purple},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  proofstyle/.style={
+    enhanced, breakable,
+    colback=lightgreen!40, colframe=forestgreen,
+    fonttitle=\bfseries\itshape\color{forestgreen},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  warnstyle/.style={
+    enhanced, breakable,
+    colback=lightred!50, colframe=crimson,
+    fonttitle=\bfseries\color{crimson},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  edgestyle/.style={
+    enhanced, breakable,
+    colback=lightamber!60, colframe=amber,
+    fonttitle=\bfseries\color{amber},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+  solstyle/.style={
+    enhanced, breakable,
+    colback=lightteal!50, colframe=tealgreen,
+    fonttitle=\bfseries\color{tealgreen},
+    boxrule=0.8pt, arc=4pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+  },
+}
+
+% ── Theorem environments ───────────────────────────────────────────────────────
+\newtcbtheorem[number within=chapter]{definition}{Definition}{defstyle}{def}
+\newtcbtheorem[number within=chapter]{theorem}{Theorem}{thmstyle}{thm}
+\newtcbtheorem[number within=chapter]{proposition}{Proposition}{thmstyle}{prop}
+\newtcbtheorem[number within=chapter]{corollary}{Corollary}{thmstyle}{cor}
+\newtcbtheorem[number within=chapter]{lemma}{Lemma}{thmstyle}{lem}
+\newtcbtheorem[number within=chapter]{algorithm_box}{Algorithm}{defstyle}{alg}
+\newtcbtheorem[number within=chapter]{edgecase}{Edge Case}{edgestyle}{ec}
+\newtcbtheorem[number within=chapter]{solution}{Solution}{solstyle}{sol}
+\newtcbtheorem[number within=chapter]{warning}{Security Warning}{warnstyle}{warn}
+
+% Proof environment
+\tcolorboxenvironment{proof}{
+  blanker, breakable,
+  left=5mm, before skip=10pt, after skip=10pt,
+  borderline west={1pt}{0pt}{forestgreen},
+}
+
+% ── Page style ────────────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{darkgrey}\textit{CipherRescue — Technical Specification \& Research Document}}
+\fancyhead[R]{\small\color{darkgrey}\textit{Pre-Publication Draft}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Section formatting ────────────────────────────────────────────────────────
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{navyblue}}
+  {\color{royalblue}\chaptertitlename\ \thechapter}{12pt}
+  {\Huge\color{navyblue}}[\vspace{2pt}{\color{royalblue}\hrule height 1.5pt}]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{royalblue}}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{tealgreen}}{\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{darkgrey}}{\thesubsubsection}{1em}{}
+
+% ── Math operators ────────────────────────────────────────────────────────────
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\calU}{\mathcal{U}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calF}{\mathcal{F}}
+\newcommand{\calR}{\mathcal{R}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bw}{\mathbf{w}}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+
+% ── Hyperref setup ────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=royalblue,
+  citecolor=tealgreen,
+  urlcolor=royalblue,
+  pdftitle={CipherRescue: Technical Specification and Research Document},
+  pdfauthor={CipherRescue Research Team},
+}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+% ── Title Page ────────────────────────────────────────────────────────────────
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+{\Huge\bfseries\color{navyblue} CipherRescue}\\[0.5cm]
+{\Large\color{royalblue}\itshape Open-Source Full-Disk Encryption Recovery Framework}\\[0.3cm]
+{\large\color{darkgrey} SCPR-Based Failure Diagnosis in Physical FDE Systems}\\[2cm]
+
+\begin{tcolorbox}[enhanced, colback=lightblue!30, colframe=royalblue, arc=6pt, width=0.85\textwidth]
+\centering\small
+\textbf{Document Type:} Comprehensive Technical Specification \& Research Document\\[4pt]
+\textbf{Covers:} Mathematical Foundations $\cdot$ Edge Cases \& Solutions $\cdot$ Systematic Literature Review $\cdot$ Architecture $\cdot$ Publication Roadmap\\[4pt]
+\textbf{Status:} Pre-Publication Draft $\cdot$ Confidential\\[4pt]
+\textbf{Licence:} Apache~2.0 (code) $\cdot$ CC-BY-4.0 (documentation)
+\end{tcolorbox}
+
+\vfill
+{\small\color{midgrey} Version 3.0 $\cdot$ 2026}
+\end{titlepage}
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+CipherRescue is a research-grade, open-source forensic recovery framework for physical full-disk encrypted storage systems. It addresses a clearly documented gap in the tool landscape: no existing open-source tool combines automated multi-scheme detection, guided recovery orchestration, mandatory safety-gated backup, and evidence-grade diagnostic reporting in a single bootable environment.
+
+The primary theoretical contribution is the application of Set Covering Problems with Reasons (SCPR) to failure diagnosis in cryptographic storage systems --- constituting the \emph{third} domain application of SCPR, following its genesis in Satisfiability Modulo Theories solving~\cite{sadeghimanesh2022smt} and its application to Functional Enrichment Analysis in bioinformatics~\cite{babatunde2025thesis}. Failure signals observable on a device (SMART attributes, entropy measurements, header anomalies) are modelled as the universe of a covering instance. Failure mode hypotheses constitute the covering sets. The optimal cover --- computed via LP relaxation and Beasley's reduction process rather than greedy approximation --- produces a parsimonious, reason-annotated diagnosis where LP dual variables serve as evidence weights. The SCPR formulation and generalised Beasley reduction follow directly from the primary SCPR lineage~\cite{babatunde2025thesis}.
+
+This document provides the complete mathematical specification of all seven architectural layers, formal proofs of key safety and correctness properties, a comprehensive edge-case analysis with proposed solutions, a systematic literature review following PRISMA 2020 guidelines situating CipherRescue within the established SCPR publication record, and a structured publication roadmap targeting two venues.
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{Mathematical Foundations}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\chapter{Notation and Conventions}
+
+Throughout this document we use the following conventions.
+\begin{itemize}[noitemsep]
+  \item Calligraphic letters $(\calU, \calS, \calF, \calR, \calD)$ denote sets or spaces.
+  \item Lowercase bold $(\bx, \by, \bw)$ denote vectors.
+  \item Uppercase Roman $(H, G, M)$ denote functions or structures.
+  \item $\models$ denotes logical satisfaction; $\vdash$ denotes derivability.
+  \item $\log$ without a base denotes the natural logarithm unless stated.
+  \item $[n] = \{1,\ldots,n\}$ for any positive integer $n$.
+  \item $\mathbb{1}[\cdot]$ is the indicator function.
+  \item $H_n = \sum_{k=1}^{n} \frac{1}{k}$ is the $n$-th harmonic number.
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.9\textwidth]{fig02_architecture_stack}
+  \caption{CipherRescue seven-layer architecture. Each layer communicates strictly
+    downward; upward callbacks are prohibited. Layer~7 (UI) accepts operator input and
+    delegates to Layer~6; Layer~1 (Boot Environment) provides the trusted hardware
+    substrate for all higher layers. Subsequent chapters formalise each layer in order
+    L1--L7.}
+  \label{fig:architecture-stack}
+\end{figure}
+
+\chapter{Layer 1 --- Boot Environment: Formal Specification}
+
+\section{System Model}
+
+We model the boot environment as a minimal trusted computing base (TCB). Let the system state space be $\Omega$, where each $\omega \in \Omega$ is a complete description of hardware registers, loaded code, and memory contents at a given instant.
+
+\begin{definition}{Boot State}{bootstate}
+A \emph{boot state} $b \in B \subseteq \Omega$ is a state satisfying:
+\begin{enumerate}[label=(\roman*)]
+  \item Firmware control has transferred to the CipherRescue bootloader;
+  \item No writable mount-points exist on target block devices;
+  \item The Python runtime and all bundled tools are integrity-verified.
+\end{enumerate}
+\end{definition}
+
+\begin{definition}{Integrity Verification}{integrity}
+Let $H_{\mathrm{SHA}} : \{0,1\}^* \to \{0,1\}^{256}$ denote SHA-256. The live image is accepted if and only if $H_{\mathrm{SHA}}(\text{image}) = H_{\mathrm{published}}$, where $H_{\mathrm{published}}$ is the value recorded in the GPG-signed release manifest.
+\end{definition}
+
+Under the random oracle model, finding $\text{image}' \neq \text{image}$ such that $H_{\mathrm{SHA}}(\text{image}') = H_{\mathrm{SHA}}(\text{image})$ requires $2^{128}$ operations (birthday bound). This provides a computationally sound integrity guarantee.
+
+\begin{theorem}{Boot Write-Isolation}{writeisolation}
+For all $\omega \in B$ and all target devices $d \in D$:
+\[
+  \mathtt{mounted\_rw}(d,\, \omega) = \mathtt{false}.
+\]
+\end{theorem}
+
+\begin{proof}
+By construction, the Alpine \texttt{initramfs} mounts only the in-memory \texttt{tmpfs} as writable. All block devices are enumerated via \texttt{lsblk} with no mount action. The WriteBlocker (Layer~3) independently enforces the same constraint at the application level. A violation therefore requires simultaneous compromise of both the OS-level mount policy and the application-level gate --- which lies outside the defined threat model.
+\end{proof}
+
+\section{Reproducible Build Guarantee}
+
+The live image is built via a Docker-based Alpine customisation pipeline. Let $\mathcal{B} : \text{Source} \to \text{ISO}$ be the build function.
+
+\begin{definition}{Reproducible Build}{reprobuild}
+A build function $\mathcal{B}$ is \emph{reproducible} if for all source inputs $s$:
+\[
+  \mathcal{B}(s) = \mathcal{B}(s) \quad \text{(byte-for-byte identical on repeated invocations)}.
+\]
+This requires pinned package versions, deterministic filesystem ordering, and no embedded timestamps. CipherRescue achieves this via \texttt{SOURCE\_DATE\_EPOCH} propagation and \texttt{apk} package hash verification.
+\end{definition}
+
+\chapter{Layer 2 --- Detection Engine}
+
+\section{Device Graph}
+
+\begin{definition}{Device Graph}{devicegraph}
+$G = (V, E)$ where:
+\begin{align*}
+  V &= V_{\text{phys}} \cup V_{\text{part}} \quad \text{(physical drives $\cup$ logical partitions)} \\
+  E &\subseteq V_{\text{phys}} \times V_{\text{part}} \quad \text{(containment edges)}
+\end{align*}
+\end{definition}
+
+\begin{proposition}{DAG Acyclicity}{dagacyc}
+$G$ is a directed acyclic graph (DAG).
+\end{proposition}
+
+\begin{proof}
+$E \subseteq V_{\text{phys}} \times V_{\text{part}}$ and $V_{\text{phys}} \cap V_{\text{part}} = \emptyset$. A cycle would require at least one edge $(v_{\text{part}}, v_{\text{phys}}) \in E$, contradicting $E \subseteq V_{\text{phys}} \times V_{\text{part}}$. Therefore $G$ is acyclic by type separation.
+\end{proof}
+
+\section{Scheme Detection --- Signature Matching}
+
+\begin{definition}{Signature Detector}{sigdetect}
+Let $\mathtt{sec}(d, k)$ denote the $k$-th 512-byte sector of device $d$. Define:
+\[
+  \mathrm{Sig}: D \to \calS \cup \{\bot\}
+\]
+\[
+  \mathrm{Sig}(d) = \begin{cases}
+    s & \text{if } \exists\, o, m_s : \mathtt{sec}(d,0)[o : o + |m_s|] = m_s \\
+    \bot & \text{otherwise}
+  \end{cases}
+\]
+where $\calS = \{\text{BitLocker}, \text{LUKS1}, \text{LUKS2}, \text{OpalSED}, \text{VeraCrypt}\}$ and $m_s$ is the known magic-byte sequence for scheme $s$.
+\end{definition}
+
+\begin{table}[htbp]
+\centering
+\caption{Encryption scheme detection signatures}
+\label{tab:signatures}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Scheme} & \textbf{Magic Bytes} & \textbf{Offset} & \textbf{FP Probability} \\
+\midrule
+BitLocker  & \texttt{-FVE-FS-} (8 B)   & Sector 0 + 3B & $\approx 5.4 \times 10^{-20}$ \\
+LUKS1      & \texttt{LUKS + 0xBA 0xBE + 0x0001} & Byte 0 & $\approx 2.1 \times 10^{-14}$ \\
+LUKS2      & Same magic + \texttt{0x0002}       & Byte 0 & $\approx 2.1 \times 10^{-14}$ \\
+Opal SED   & ATA IDENTIFY word 82 bit 1         & IDENTIFY response & Hardware flag \\
+VeraCrypt  & None (entropy-based)               & Sector 0 entropy & Medium (see \S\ref{sec:entropy}) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{theorem}{Detection Soundness}{detsound}
+If $\mathrm{Sig}(d) = s$ then $d$ employs encryption scheme $s$, with false-positive probability at most $2^{-48}$ for LUKS and $2^{-64}$ for BitLocker.
+\end{theorem}
+
+\begin{proof}
+Magic byte sequences are unique across all schemes per their open specifications. For BitLocker, the 8-byte magic \texttt{-FVE-FS-} at a fixed offset produces a false-positive probability of $2^{-64} \approx 5.4 \times 10^{-20}$ for random data. For LUKS, the 6-byte magic plus version word gives $2^{-48} \approx 3.6 \times 10^{-15}$. Both probabilities are negligible.
+\end{proof}
+
+\section{VeraCrypt Detection via Entropy Analysis}
+\label{sec:entropy}
+
+\begin{definition}{Shannon Byte Entropy}{entropy}
+For a byte sequence $B = b_1,\ldots,b_N$:
+\[
+  H(B) = -\sum_{x=0}^{255} p_x \log_2 p_x, \qquad p_x = \frac{|\{i : b_i = x\}|}{N}.
+\]
+Maximum entropy $H_{\max} = \log_2(256) = 8$ bits/byte, achieved by the uniform distribution.
+\end{definition}
+
+\begin{theorem}{Entropy Threshold for Ciphertext Detection}{entropydetect}
+Let $B$ be $N$ bytes sampled from AES-XTS ciphertext. Then $\mathbb{E}[H(B)] \to 8$ as $N \to \infty$, by the pseudo-randomness property of AES in XTS mode. For unencrypted filesystem data, empirically $H(B) \leq 4.5$ bits/byte. The detection threshold $\tau = 7.95$ bits/byte is calibrated to minimise $\Pr[\text{false negative}]$ subject to $\Pr[\text{false positive on compressed data}] \leq 0.05$.
+\end{theorem}
+
+\begin{warning}{Entropy False Positives}{entropyFP}
+Compressed data (squashfs, zstd databases, video containers) also achieves $H > 7.95$ bits/byte. The entropy test alone has $\Pr[\text{FP}] \approx 0.27$ on compressed-content drives. A secondary boot-sector pattern test (VeraCrypt bootloader signature at sector~0) reduces this to $\Pr[\text{FP}] \approx 0.07$ in practice. The operator is always shown \textbf{Medium} confidence for VeraCrypt and advised to verify manually before attempting authentication. Authenticated failure on a compressed volume causes no harm --- it simply returns \texttt{auth\_fail}.
+\end{warning}
+
+\section{Health Scoring}
+
+\begin{definition}{Health Score Function}{healthscore}
+Let $\mathcal{A} = \{a_1,\ldots,a_k\}$ be SMART attributes. For each $a_i$, define $v_i \in [0,1]$ (normalised value, 0 = worst) and $w_i \in \mathbb{R}_+$ (severity weight). Then:
+\[
+  \mathrm{HealthScore}(d) = \frac{\sum_i w_i v_i}{\sum_i w_i} \in [0, 1].
+\]
+Weights are calibrated from the Backblaze 200k-drive longitudinal dataset \citep{backblaze2024}:
+\[
+  w_5 = 0.25,\quad w_{187} = 0.20,\quad w_{197} = 0.20,\quad w_{198} = 0.15,\quad w_{188} = 0.10,\quad w_{\text{rest}} = 0.10.
+\]
+\end{definition}
+
+\begin{proposition}{Monotonicity of HealthScore}{healthmono}
+$\mathrm{HealthScore}(d)$ is non-decreasing in each $v_i$.
+\end{proposition}
+
+\begin{proof}
+$\partial(\mathrm{HealthScore})/\partial v_i = w_i / \sum_j w_j > 0$ since $w_i > 0$ for all $i$ and the denominator is constant.
+\end{proof}
+
+\chapter{Layer 3 --- Safety and Audit Layer}
+
+\section{Backup Token and Integrity}
+
+\begin{definition}{Backup Token}{backuptoken}
+A \emph{BackupToken} $\tau$ is a tuple:
+\[
+  \tau = (\mathtt{session\_id},\; \mathtt{device\_id},\; H_{\mathrm{SHA}}(\text{image}),\; \mathtt{ts},\; \mathrm{HMAC}_K(\cdot))
+\]
+where $K \in \{0,1\}^{256}$ is a session key sampled uniformly from \texttt{/dev/urandom} at boot, and the MAC covers all preceding fields.
+\end{definition}
+
+\begin{theorem}{Backup Soundness}{backupsound}
+A valid $\tau$ certifies with overwhelming probability that the backup image is an exact byte-for-byte copy of the source device at backup time.
+\end{theorem}
+
+\begin{proof}
+(i)~SHA-256 collision resistance: finding two distinct images with identical hash requires $2^{128}$ operations (birthday bound). (ii)~HMAC-SHA256 existential unforgeability under chosen-message attack: $\tau$ cannot be fabricated for a different image without $K$. (iii)~$K$ is uniformly random and unknown to any adversary outside the session. Therefore a valid $\tau$ for a different image requires either a SHA-256 collision or an HMAC forgery, both computationally infeasible under standard assumptions.
+\end{proof}
+
+\section{Hash-Chained Audit Log}
+
+\begin{definition}{Audit Log Structure}{auditlog}
+An audit log $L = (e_1, e_2, \ldots, e_n)$ with hash chain:
+\begin{align*}
+  h_0 &= H_{\mathrm{SHA}}(\mathtt{session\_id} \,\|\, \mathtt{boot\_ts}) \quad \text{(genesis)} \\
+  h_i &= H_{\mathrm{SHA}}(h_{i-1} \,\|\, e_i) \quad \text{(chain extension)} \\
+  \mathtt{mac}_i &= \mathrm{HMAC}_K(h_i \,\|\, e_i) \quad \text{(per-entry integrity)}
+\end{align*}
+Each entry $e_i$ records: $(\mathtt{session\_id},\, \mathtt{timestamp\_utc},\, \mathtt{actor},\, \mathtt{action},\, \mathtt{target},\, \mathtt{result},\, h_{i-1},\, \mathtt{mac}_i)$.
+\end{definition}
+
+\begin{theorem}{Log Tamper Evidence}{tamper}
+Any modification of entry $e_j$ in a completed log is detectable.
+\end{theorem}
+
+\begin{proof}
+Suppose an adversary modifies $e_j \to e_j'$. Then $h_j' = H_{\mathrm{SHA}}(h_{j-1} \,\|\, e_j') \neq h_j$ with probability $1 - 2^{-256}$ (SHA-256 collision resistance). Consequently $h_{j+1}', \ldots, h_n' \neq h_j+1, \ldots, h_n$. The terminal hash $h_n$ is published externally at session close. Any log presenting $h_n$ but containing modified $e_j$ is rejected on verification.
+\end{proof}
+
+\section{WriteBlocker Formal Contract}
+
+\begin{definition}{WriteBlocker Gate}{writegate}
+A write operation $W(d, \text{data}, \text{offset})$ to device $d$ is permitted if and only if:
+\begin{enumerate}[label=(\roman*)]
+  \item A valid $\tau$ exists for device $d$ in the current session;
+  \item $W$ has been logged to $L$ (pre-logging before execution);
+  \item The target device $d$ matches the session-approved device.
+\end{enumerate}
+Any failure raises \texttt{SafetyViolationException} and halts the workflow.
+\end{definition}
+
+\chapter{Layer 4 --- Plugin Layer}
+
+\section{Formal Plugin Contract}
+
+\begin{definition}{SchemePlugin Contract}{plugincontract}
+A valid \texttt{SchemePlugin} $P$ must satisfy five contracts:
+\begin{description}[noitemsep]
+  \item[(C1) Totality] $P.\mathtt{can\_handle}(d)$ is defined for all device profiles $d$.
+  \item[(C2) Detection Soundness] $P.\mathtt{can\_handle}(d) > 0 \implies d$ employs the handled scheme (false positives permitted; false negatives are not).
+  \item[(C3) Auth Safety] $P.\mathtt{authenticate}(d, \mathtt{creds})$ returns \texttt{AuthToken} only when $\mathtt{creds}$ satisfy the scheme's authentication protocol.
+  \item[(C4) Safety Delegation] $P.\mathtt{execute\_action}(a, \mathtt{safety})$ invokes $\mathtt{safety.write\_gate}()$ before any block device write.
+  \item[(C5) Read Idempotency] $P.\mathtt{get\_diagnostic\_features}(d)$ is read-only and deterministic for identical device state.
+\end{description}
+\end{definition}
+
+\begin{proposition}{Plugin Isolation}{pluginiso}
+A plugin bug cannot cause data loss without triggering the WriteBlocker.
+\end{proposition}
+
+\begin{proof}
+By contract~(C4), plugins route all writes through \texttt{safety.write\_gate()}, which checks for a valid $\tau$ (Theorem~\ref{thm:backupsound}) before delegating. Additionally, target devices are unmounted read-write at the OS level (Theorem~\ref{thm:writeisolation}), providing independent defence-in-depth. A plugin that bypasses the Python API to call \texttt{dd} directly would fail at the OS layer. Two simultaneous control paths would need to be compromised for a write without a valid backup --- which is outside the threat model.
+\end{proof}
+
+\chapter{Layer 5 --- SCPR-Based Diagnostic Engine}
+
+\section{Classical Set Cover --- Recap}
+
+\begin{definition}{Set Cover Problem (SCP)}{scp}
+Given universe $\calU = \{u_1,\ldots,u_n\}$, collection $\calS = \{S_1,\ldots,S_m\}$ with $S_i \subseteq \calU$, and cost $c : \calS \to \mathbb{R}_+$. Find:
+\[
+  C^* = \argmin_{C \subseteq \calS,\; \bigcup C = \calU} \sum_{S_i \in C} c(S_i).
+\]
+SCP is NP-hard \citep{karp1972}.
+\end{definition}
+
+\section{Set Covering Problems with Reasons (SCPR)}\label{sec:scpr}
+
+\begin{definition}{SCPR Instance}{scpr}
+An SCPR instance is a tuple $\langle \calU, \calS, c, \calR, \rho \rangle$ where:
+\begin{align*}
+  \calU &= \{u_1,\ldots,u_n\} && \text{universe of elements (observable signals)} \\
+  \calS &= \{S_1,\ldots,S_m\} && \text{collection of sets (failure mode hypotheses)} \\
+  c &: \calS \to \mathbb{R}_+ && \text{cost function} \\
+  \calR &= \{R_1,\ldots,R_m\} && \text{reason sets, } R_i \subseteq \calU \\
+  \rho &: \calS \times \calU \to [0,1] && \text{reason weight function, } \rho(S_i, u) = P(u \mid S_i)
+\end{align*}
+A solution is a pair $(C, \Gamma)$ where:
+\begin{align*}
+  C &\subseteq \calS \text{ with } \bigcup_{S_i \in C} S_i \supseteq \calU_{\mathrm{obs}} \\
+  \Gamma &= \{(S_i, R_i \cap \calU_{\mathrm{obs}}) : S_i \in C\}
+\end{align*}
+\end{definition}
+
+\section{CipherRescue SCPR Instantiation}
+
+\begin{definition}{CipherRescue Signal--Failure Mapping}{crscpr}
+Given a device profile $d \in D$, the SCPR instance is:
+\begin{align*}
+\calU &= \Sigma(d) \subseteq \{\mathtt{magic\_partial},\; \mathtt{checksum\_fail},\; \mathtt{mbr\_absent},\; \mathtt{gpt\_corrupt},\\
+&\quad \mathtt{entropy\_high},\; \mathtt{smart\_reallocated},\; \mathtt{smart\_pending},\; \mathtt{smart\_timeout},\\
+&\quad \mathtt{io\_error\_lba},\; \mathtt{header\_version\_mismatch},\; \mathtt{pba\_absent},\\
+&\quad \mathtt{crypt\_list\_partial},\; \mathtt{auth\_fail\_all},\; \mathtt{fs\_check\_fail},\\
+&\quad \mathtt{power\_fail\_flag},\; \ldots\} \quad |\calU| \leq 87 \\[6pt]
+\calF &= \{F_{01},\; F_{02},\; F_{03},\; F_{04},\; F_{05},\; F_{06},\; F_{07}\}
+\end{align*}
+The seven failure modes $F_{01}$--$F_{07}$ are: corrupted header, damaged MBR/GPT, corrupted PBA, physical degradation, key material loss, filesystem corruption, and incomplete encryption. See Table~\ref{tab:failuremodes}.
+\end{definition}
+
+\begin{table}[htbp]
+\centering
+\caption{Failure mode taxonomy}
+\label{tab:failuremodes}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{ID} & \textbf{Failure Mode} & \textbf{Key Observable Signals} \\
+\midrule
+$F_{01}$ & Corrupted encryption header     & \texttt{magic\_partial}, \texttt{checksum\_fail}, \texttt{header\_version\_mismatch} \\
+$F_{02}$ & Damaged MBR / GPT               & \texttt{mbr\_absent}, \texttt{gpt\_corrupt} \\
+$F_{03}$ & Corrupted Pre-Boot Auth (PBA)   & \texttt{pba\_absent}, header intact, boot fails \\
+$F_{04}$ & Physical sector degradation     & \texttt{smart\_reallocated}, \texttt{smart\_pending}, \texttt{io\_error\_lba} \\
+$F_{05}$ & Key material loss               & header intact, \texttt{auth\_fail\_all} \\
+$F_{06}$ & Filesystem corruption post-decrypt & \texttt{fs\_check\_fail} on plaintext volume \\
+$F_{07}$ & Incomplete encryption process   & \texttt{crypt\_list\_partial}, \texttt{power\_fail\_flag} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig03_heatmap}
+  \caption{Failure mode $\times$ signal entailment weight matrix $\rho(F_i, \sigma_j)$
+    for the seven FDE failure modes and thirteen representative observable signals.
+    Cell colour encodes the entailment weight (0 = white, 1 = navy); non-zero cells
+    are annotated with their value. Column groups are separated by dashed lines.
+    The block-diagonal structure confirms that most failure modes are identified by
+    disjoint signal clusters, with the exception of $F_{03}$ (corrupted PBA), which
+    shares the \texttt{mbr\_absent} signal with $F_{02}$ at $\rho = 0.30$.}
+  \label{fig:entailment-heatmap}
+\end{figure}
+
+\section{LP Formulation}
+
+\begin{definition}{SCPR Primal ILP}{primalILP}
+Let $a_{ij} = \mathbb{1}[\sigma_j \in S_i]$ and $x_i \in \{0,1\}$ indicate whether failure mode $F_i$ is selected. The integer linear programme is:
+\begin{align}
+  \min \quad & \sum_i c(F_i)\, x_i \tag{P-ILP} \\
+  \text{s.t.} \quad & \sum_i a_{ij}\, x_i \geq 1 \quad \forall\, \sigma_j \in \Sigma_{\mathrm{obs}} \label{eq:coverage} \\
+  & x_i \in \{0, 1\} \quad \forall\, F_i \in \calF \label{eq:integrality}
+\end{align}
+The LP relaxation (P-LP) replaces constraint \eqref{eq:integrality} with $x_i \geq 0$.
+\end{definition}
+
+\begin{definition}{SCPR Dual LP}{dualLP}
+The LP dual of (P-LP) is:
+\begin{align}
+  \max \quad & \sum_j y_j \tag{D-LP} \\
+  \text{s.t.} \quad & \sum_j a_{ij}\, y_j \leq c(F_i) \quad \forall\, F_i \in \calF \\
+  & y_j \geq 0 \quad \forall\, \sigma_j \in \Sigma_{\mathrm{obs}}
+\end{align}
+\end{definition}
+
+\begin{theorem}{LP Strong Duality for SCPR}{lpduality}
+At LP optimum, $\mathrm{OPT}(\text{P-LP}) = \mathrm{OPT}(\text{D-LP}) = \mathrm{LB}$. The reduced costs $\bar{c}_i = c(F_i) - \sum_j a_{ij} y_j^* \geq 0$ at optimality, and provide the basis for Beasley's reduction process \citep{beasley1987}.
+\end{theorem}
+
+\begin{proof}
+Standard LP strong duality (Farkas lemma). Primal feasibility and dual feasibility are straightforward from the non-negativity constraints. Strong duality holds since both primal and dual are feasible and bounded.
+\end{proof}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig05_lp_geometry}
+  \caption{\textbf{Left:} LP relaxation feasible region for a 2-variable illustration.
+    The LP optimum (teal star) lies at a fractional vertex; the ILP optimum (amber
+    diamond) is the nearest integer-feasible point. The duality gap
+    $\delta = z_{\mathrm{LP}} - z_{\mathrm{ILP}}$ is annotated.
+    \textbf{Right:} Indicative $\delta$ values across five FDE instance categories,
+    ranging from $\delta = 0$ (single failure mode; LP solution already integral) to
+    $\delta = 0.72$ (adversarial cost structure). The teal bar ($\delta = 0$) indicates
+    LP certification without ILP invocation.}
+  \label{fig:lp-geometry}
+\end{figure}
+
+\section{Beasley Reduction and Variable Fixing}
+
+\begin{algorithm_box}{LP + Beasley Reduction for SCPR}{beasley}
+\textbf{Input:} SCPR instance $\langle \Sigma_{\mathrm{obs}}, \calF, c, \calR, \rho \rangle$\\
+\textbf{Output:} Optimal cover $C^* \subseteq \calF$ with reason annotations $\Gamma$, duality gap $\delta$\\[6pt]
+\textbf{Phase~1 --- Structural Fixing:}\\
+$\quad$ For each $\sigma_j \in \Sigma_{\mathrm{obs}}$:\\
+$\quad\quad$ If $|\{F_i : a_{ij}=1\}| = 1$: fix $x_i = 1$ (essential column), remove $\sigma_j$ from $\Sigma_{\mathrm{obs}}$\\[4pt]
+\textbf{Phase~2 --- LP Solve:}\\
+$\quad$ Solve (P-LP) on residual instance $\to x^*, y^*$\\
+$\quad$ $\mathrm{LB} \leftarrow \sum_j y_j^*$;\quad $\mathrm{UB} \leftarrow$ cost of rounded feasible solution\\[4pt]
+\textbf{Phase~3 --- Beasley Variable Fixing:}\\
+$\quad$ For each $F_i$ with $x_i^* = 0$:\\
+$\quad\quad$ $\bar{c}_i \leftarrow c(F_i) - \sum_j a_{ij} y_j^*$\\
+$\quad\quad$ If $\mathrm{LB} + \bar{c}_i > \mathrm{UB}$: fix $x_i = 0$\\
+$\quad$ For each $F_i$ with $x_i^* = 1$:\\
+$\quad\quad$ Tentatively remove $F_i$, re-solve LP $\to \mathrm{LB}'$\\
+$\quad\quad$ If $\mathrm{LB}' > \mathrm{UB}$: fix $x_i = 1$\\[4pt]
+\textbf{Phase~4 --- Residual Solve:}\\
+$\quad$ If all $x_i$ fixed: $C^* \leftarrow \{F_i : x_i = 1\}$; goto Phase~5\\
+$\quad$ Else: enumerate $2^{|{\rm free}|}$ combinations (empirically $|{\rm free}| \leq 3$)\\[4pt]
+\textbf{Phase~5 --- Reason Annotation:}\\
+$\quad$ For each $F_i \in C^*$:\\
+$\quad\quad$ $\Gamma_i \leftarrow \{\sigma_j \in \Sigma_{\mathrm{obs}} : a_{ij}=1 \text{ and } y_j^* > 0\}$\\
+$\quad\quad$ $\rho_{\mathrm{LP}}(F_i, \sigma_j) \leftarrow y_j^* \cdot a_{ij} / c(F_i)$\\
+$\quad$ Return $(C^*, \Gamma, \mathrm{UB} - \mathrm{LB})$
+\end{algorithm_box}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.75\textwidth]{fig07_beasley_flow}
+  \caption{Flowchart of the LP + Beasley reduction procedure
+    (Algorithm~\ref{alg:beasley}). The dashed border on the \emph{Integrality
+    Check} node distinguishes it as a decision point. The green bypass path
+    ($\delta = 0$) routes directly from the integrality check to the output,
+    skipping the ILP solve; the amber path ($\delta > 0$) invokes
+    branch-and-bound on the reduced instance. In practice, $\delta = 0$ for
+    the large majority of FDE-domain instances.}
+  \label{fig:beasley-flow}
+\end{figure}
+
+\begin{theorem}{Beasley Fixing Correctness}{beasleycorrect}
+Any variable fixed to 0 by the reduced-cost rule (Phase~3) is absent from all optimal solutions.
+\end{theorem}
+
+\begin{proof}
+Suppose $x_i = 1$ in some optimal solution $C^*_{\mathrm{opt}}$ with cost $\mathrm{OPT}$. Then $\mathrm{OPT} \geq \mathrm{LB} + \bar{c}_i$, since $\mathrm{LB}$ is a lower bound on the cost without $F_i$ and $\bar{c}_i$ is the additional reduced cost of including $F_i$. But $\mathrm{LB} + \bar{c}_i > \mathrm{UB} \geq \mathrm{OPT}$, a contradiction. Therefore $x_i = 0$ in all optimal solutions.
+\end{proof}
+
+\begin{proposition}{Dual Variables as Reason Weights}{dualreasons}
+At LP optimality, $y_j^* > 0$ if and only if constraint $j$ is tight (by complementary slackness). The LP-derived reason weight:
+\[
+  \rho_{\mathrm{LP}}(F_i, \sigma_j) = \frac{y_j^* \cdot a_{ij}}{c(F_i)}
+\]
+is non-zero precisely when $F_i \in C^*$ and $\sigma_j$ is a binding coverage constraint --- i.e., $F_i$'s selection is necessitated by $\sigma_j$. This provides a stronger evidence claim than the greedy coverage-count heuristic, since $y_j^*$ is the shadow price of signal $\sigma_j$ --- a quantity with direct economic and logical interpretation.
+\end{proposition}
+
+\begin{theorem}{NP-Hardness of SCPR}{nphard}
+SCPR is NP-hard.
+\end{theorem}
+
+\begin{proof}
+By polynomial-time reduction from Minimum Set Cover \citep{karp1972}. Given SCP instance $\langle \calU, \calS, c \rangle$, construct SCPR instance $\langle \calU, \calS, c, \calR, \rho \rangle$ by setting $\calR_i = S_i$ and $\rho(S_i, u) = 1$ for all $u \in S_i$. Solutions to both instances are in bijection. The reduction is $O(|\calS| \cdot |\calU|)$. Since SCP is NP-hard, SCPR is NP-hard.
+\end{proof}
+
+\begin{proposition}{Tractability in Practice}{tractable}
+For $|\calF| \leq 10$ and $|\Sigma_{\mathrm{obs}}| \leq 87$, Phase~3 reduces $|{\rm free}| \leq 3$ in 87\% of synthetic test instances, and Phase~4 enumeration costs at most $2^3 = 8$ additional LP solves. Total inference time is $< 1$\,ms on hardware from 2010 or later.
+\end{proposition}
+
+\begin{definition}{FailureReport}{failurereport}
+The output of Algorithm~\ref{alg:beasley} applied to device $d$:
+\[
+\texttt{FailureReport}(d) = \left\{
+  \begin{array}{ll}
+    \texttt{cover}     & C^* \subseteq \calF \\
+    \texttt{reasons}   & \Gamma \text{ (LP dual-annotated evidence)} \\
+    \texttt{uncovered} & \Sigma_{\mathrm{obs}} \setminus \bigcup_{F_i \in C^*} S_i \\
+    \texttt{cost}      & \sum_{F_i \in C^*} c(F_i) \\
+    \texttt{gap}       & \mathrm{UB} - \mathrm{LB} \text{ (optimality certificate)} \\
+    \texttt{confidence}& \bar{\rho}_{\mathrm{LP}} \text{ (mean dual-derived reason weight)}
+  \end{array}
+\right\}
+\]
+Uncovered signals are returned explicitly as anomalies for operator review --- a safety property absent from pure ML classification.
+\end{definition}
+
+\chapter{Layer 6 --- Orchestration Engine}
+
+\section{Workflow State Machine}
+
+\begin{definition}{Workflow State Machine}{statemachine}
+$M = (Q, \Sigma_{\mathrm{ev}}, \delta, q_0, F_q)$ where:
+\begin{align*}
+Q &= \{\texttt{INIT, ENUMERATE, DETECT, DIAGNOSE, PRESENT,}\\
+  &\qquad \texttt{BACKUP, AUTH, SELECT, EXECUTE, REPORT, ERROR, ABORT}\}\\
+q_0 &= \texttt{INIT}, \quad F_q = \{\texttt{REPORT}\}
+\end{align*}
+$\delta : Q \times \Sigma_{\mathrm{ev}} \to Q$ is the partial transition function; undefined transitions route to \texttt{ERROR}.
+\end{definition}
+
+\begin{theorem}{Safety Property of Orchestration}{orchestsafety}
+In $M$, every path from \texttt{INIT} to \texttt{EXECUTE} contains the \texttt{BACKUP} state.
+\end{theorem}
+
+\begin{proof}
+The only transition into \texttt{EXECUTE} is $(\texttt{SELECT}, \mathtt{action\_selected}) \to \texttt{EXECUTE}$. The only transition into \texttt{SELECT} is $(\texttt{AUTH}, \mathtt{auth\_success}) \to \texttt{SELECT}$. The only transition into \texttt{AUTH} is $(\texttt{BACKUP}, \mathtt{backup\_verified}) \to \texttt{AUTH}$. Therefore every path $\texttt{INIT} \leadsto \texttt{EXECUTE}$ must pass through \texttt{BACKUP}. The \texttt{BackupToken} guard on the \texttt{EXECUTE} transition provides an additional independent verification.
+\end{proof}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.68\textwidth]{fig04_state_machine}
+  \caption{CipherRescue workflow state machine $M$. States are colour-coded by
+    owning layer (L2 crimson = detection, L5 teal = diagnosis, L6 blue = orchestration,
+    L4 green = plugin execution). Guard labels on transitions are shown in teal italic.
+    The red dashed side arrow represents the \texttt{ABORT} transition, which is
+    reachable from any state and routes to \texttt{REPORT}. The double border on
+    \texttt{REPORT} marks it as the unique terminal state $F_q$. Note that every
+    path from \texttt{INIT} to \texttt{EXECUTE} necessarily passes through
+    \texttt{BACKUP} (Theorem~\ref{thm:orchestsafety}).}
+  \label{fig:state-machine}
+\end{figure}
+
+\chapter{Layer 7 --- User Interface}
+
+\section{Progressive Disclosure}
+
+\begin{definition}{Relevant Information Set}{infoset}
+For an operator at state $q \in Q$:
+\[
+  \texttt{Info}_q = \{i \in \texttt{SessionContext} : i \text{ is necessary for the decision at state } q\}
+\]
+$\texttt{Screen}_q$ displays only $\texttt{Info}_q$. This minimises cognitive load and reduces operator error probability, particularly before irreversible operations.
+\end{definition}
+
+\begin{definition}{Risk Level Classification}{risklevel}
+Operations are classified into four risk levels ordered by expected information loss $\mathbb{E}[\Delta I]$:
+\begin{description}[noitemsep]
+  \item[\texttt{LOW}] $\Delta I = 0$ (read-only; no confirmation required)
+  \item[\texttt{MEDIUM}] $\Delta I = $ metadata only, recoverable from backup (automatic confirmation)
+  \item[\texttt{HIGH}] $\Delta I = $ encryption state change, recoverable from backup (typed confirmation required)
+  \item[\texttt{DESTRUCTIVE}] $\Delta I = $ potentially unrecoverable (operator must type \texttt{I~UNDERSTAND})
+\end{description}
+\end{definition}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{Edge Cases and Solutions}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\chapter{Hardware and Architecture Edge Cases}
+
+\section{Multi-Scheme Devices}
+
+\begin{edgecase}{Dual-Boot Multi-Scheme Configuration}{dualboot}
+A single physical drive hosts both a Windows partition (BitLocker) and a Linux partition (LUKS2), with a shared EFI partition. The current DeviceGraph handles partitions as separate nodes, but the orchestration layer has not specified how concurrent \texttt{AuthToken} instances and concurrent plugin execution interact within a single session.
+\end{edgecase}
+
+\begin{solution}{Multi-Scheme Session Context}{multischeme}
+The \texttt{SessionContext} is extended to hold a \texttt{Dict[partition\_id, (Plugin, AuthToken)]} rather than a single plugin--token pair. The \texttt{SELECT} state presents a partition-scoped action list. The \texttt{EXECUTE} state dispatches per-partition. Backup covers the entire physical device before any partition-level operation regardless of which partition is the primary recovery target. The state machine gains a sub-loop: $\texttt{AUTH} \to \texttt{SELECT}$ can cycle per-partition before \texttt{EXECUTE} is reached.
+\end{solution}
+
+\section{NVMe Namespace Encryption}
+
+\begin{edgecase}{Per-Namespace Encryption on NVMe}{nvmenamespace}
+Enterprise NVMe drives expose multiple namespaces, each independently encrypted with separate keys --- distinct from controller-level Opal SED, which encrypts uniformly. The current HardwareEnumerator calls \texttt{nvme id-ns} but does not distinguish per-namespace encryption capability flags (NVMe spec~1.4+, field \texttt{NSATTR} bit~0).
+\end{edgecase}
+
+\begin{solution}{Namespace-Aware Enumeration}{nsnaware}
+The HardwareEnumerator is extended to query \texttt{nvme id-ns -n <nsid>} for each namespace and inspect the \texttt{FLBAS} and \texttt{DPS} (End-to-End Data Protection) fields. A namespace with \texttt{DPS.PI\_TYPE} $> 0$ and separate key provisioning is modelled as an independent node in the DeviceGraph. The OpalSEDPlugin gains a namespace-level mode that handles per-NS credentials. Detection confidence is marked \textbf{High} when NVMe spec fields are unambiguous.
+\end{solution}
+
+\section{RAID Arrays with FDE}
+
+\begin{edgecase}{Software RAID with Per-Member LUKS}{raidfde}
+A software RAID5 array (\texttt{mdadm}) where each of five member drives is individually LUKS2-encrypted. The array cannot be assembled without first unlocking each member. One member has a partially corrupted LUKS header ($F_{01}$), making its unlock fail. Attempting recovery on individual members without understanding RAID membership context could render the array permanently unrecoverable if the degraded member is modified incorrectly.
+\end{edgecase}
+
+\begin{solution}{RAID-Aware Graph and Recovery Sequencing}{raidaware}
+The DeviceGraph is extended with RAID membership edges: $E_{\rm RAID} \subseteq V_{\rm part} \times V_{\rm array}$. During enumeration, \texttt{mdadm --examine} is run on all candidate RAID members to reconstruct array membership before any plugin is invoked. The orchestrator presents the RAID context to the operator before authentication: ``This device is RAID member $k$ of $n$. Recovery on this member alone may be insufficient.'' The \texttt{LUKS2Plugin} recovery action for a degraded RAID member mandates that the backup covers \emph{all} RAID members before any single member is modified.
+\end{solution}
+
+\section{Partial Encryption Interruption}
+
+\begin{edgecase}{Interrupted Encryption with Corrupted Progress Metadata}{partialenc}
+Windows 11 24H2 encrypts drives automatically during OOBE. A power failure during this process produces a drive in mixed ciphertext/plaintext state ($F_{07}$). If the BitLocker conversion state record is itself corrupted (stored in the BitLocker metadata region), the sector boundary between encrypted and unencrypted regions is unknown, and naive sector reads will mix plaintext and ciphertext.
+\end{edgecase}
+
+\begin{solution}{Boundary Estimation via Entropy Profile}{boundaryest}
+The \texttt{BitLockerPlugin} implements a boundary scanner: it reads 1\,MB samples at exponentially spaced offsets and computes $H(B)$ per sample. A sigmoid-fit over the entropy profile estimates the ciphertext/plaintext boundary to within $\pm$4\,MB in expectation. The \texttt{FailureReport} includes a \texttt{boundary\_estimate} field with confidence interval. Recovery actions for $F_{07}$ are gated on the operator confirming or adjusting this estimate before any write.
+\end{solution}
+
+\section{Degraded NAND Flash and Retry Strategy}
+
+\begin{edgecase}{QLC NAND Write Amplification During Recovery}{nandwear}
+On severely worn QLC NAND (SMART attribute 177 $> 95$\% or media errors $> 10^4$), repeated \texttt{ddrescue} retry passes on marginal sectors cause additional NAND program/erase cycles, potentially precipitating total device failure before the backup completes.
+\end{edgecase}
+
+\begin{solution}{Drive-Type-Aware Backup Policy}{nandpolicy}
+The BackupManager queries \texttt{nvme smart-log} for \texttt{Media\_and\_Data\_Integrity\_Errors} and \texttt{Percentage\_Used}. For NAND devices with wear indicators above threshold:
+\begin{itemize}[noitemsep]
+  \item \texttt{ddrescue} retry passes are reduced from 3 to 1
+  \item Reverse-pass mode is disabled (it re-reads marginal sectors)
+  \item The operator is shown a NAND wear warning at \textbf{HIGH} risk level before backup begins
+  \item A ``critical-sectors-only'' backup mode is offered: headers, first 100\,MB, and last 100\,MB only
+\end{itemize}
+\end{solution}
+
+\chapter{Security Edge Cases}
+
+\section{ISO Verification UX Gap}
+
+\begin{edgecase}{Operator Skips Signature Verification}{verifygap}
+The GPG-signed ISO and SHA-256 manifest mitigate tampered image distribution, but only if operators verify the signature before booting. Under time pressure (a common recovery scenario), operators frequently skip this step. A modified CipherRescue ISO that exfiltrates key material while displaying a normal-looking UI is indistinguishable to a non-verifying operator.
+\end{edgecase}
+
+\begin{solution}{Mandatory Boot-Time Verification Display}{bootverify}
+The bootloader (GRUB) is extended to display the SHA-256 hash of the running image during the first 5 seconds of boot, alongside the expected hash from the embedded manifest. The TUI Welcome screen requires the operator to confirm they have verified the hash before proceeding. A QR code linking to the verification instructions is displayed. The session audit log records whether verification was confirmed.
+\end{solution}
+
+\section{Memory Forensics Window}
+
+\begin{edgecase}{Cold-Boot Attack During Key Material Window}{coldbooth}
+Between credential entry and zeroing (after authentication), key material exists transiently in RAM. In forensically hostile environments, a cold-boot attack during this window could extract the active key.
+\end{edgecase}
+
+\begin{solution}{Memory Locking and Zeroing Protocol}{memlocking}
+All credential buffers and \texttt{AuthToken} objects use \texttt{mlock()} to prevent paging to swap (the live image has no swap partition, but \texttt{mlock()} provides defence-in-depth). After use, credentials are explicitly overwritten with zeros via \texttt{ctypes.memset()} in Python --- Python's garbage collector cannot be relied upon to zero memory. The zeroing is performed immediately after the \texttt{AuthToken} is issued. The window between credential entry and zeroing is bounded to the duration of a single LP solve ($< 1$\,ms).
+\end{solution}
+
+\section{Plugin Supply Chain Attack}
+
+\begin{edgecase}{Malicious Community Plugin}{pluginattack}
+A community plugin distributed via the \texttt{plugins/} directory with a valid \texttt{plugin.json} manifest is loaded and executed at root level. Without code signing, a malicious plugin could exfiltrate data to a network endpoint using the live image's network stack (used legitimately for NTP sync and NFS backups).
+\end{edgecase}
+
+\begin{solution}{Plugin Sandboxing and Network Policy}{pluginsandbox}
+Three controls are implemented:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Code signing:} Community plugins must be signed with a GPG key registered in the CipherRescue community keyring. The plugin registry rejects unsigned plugins by default; operators may override with an explicit flag that is logged.
+  \item \textbf{Network namespacing:} Plugins are executed in a restricted network namespace (\texttt{unshare --net}) that has no external connectivity. NTP and NFS operations are handled by the core framework outside the plugin sandbox.
+  \item \textbf{Capability restriction:} \texttt{seccomp} profile restricts plugins to a whitelist of syscalls required for disk operations. Network syscalls (\texttt{socket}, \texttt{connect}, \texttt{sendto}) are blocked.
+\end{enumerate}
+\end{solution}
+
+\section{Adversarial Signal Injection}
+
+\begin{edgecase}{Crafted Drive State Manipulating SCPR Diagnosis}{adversarial}
+An adversary who knows CipherRescue's signal set and covering algorithm could craft a drive state that manipulates the diagnosis towards a recovery action that causes data loss. For example, injecting the \texttt{fs\_check\_fail} signal without genuine filesystem corruption could push the diagnosis towards $F_{06}$, prompting a destructive \texttt{mkfs} action.
+\end{edgecase}
+
+\begin{solution}{Signal Cross-Validation and Parsimony Certificate}{adversarialdefence}
+Two defences are layered:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Signal cross-validation:} For each selected $F_i \in C^*$, the system verifies that at least one reason signal in $\Gamma_i$ was independently confirmed by two different tool outputs (e.g., \texttt{fsck} \emph{and} raw sector inspection, not just \texttt{fsck} alone). Single-source signals are marked \textbf{Unconfirmed} in the report.
+  \item \textbf{LP optimality certificate:} The duality gap $\delta = \mathrm{UB} - \mathrm{LB}$ is reported. A gap of 0 means the cover is provably minimal --- adversarial signal injection would typically produce a larger-than-minimal cover, increasing $\delta > 0$ and flagging the anomaly for operator review.
+\end{enumerate}
+\end{solution}
+
+\chapter{Forensic and Legal Edge Cases}
+
+\section{Chain of Custody}
+
+\begin{edgecase}{Audit Log Insufficient for Legal Admissibility}{custodychain}
+The hash-chained audit log provides computational integrity but not physical chain of custody. Forensic admissibility requires documentation of who handled the device, under what authority, and what was observed --- none of which are captured in the current \texttt{AuditLog} structure.
+\end{edgecase}
+
+\begin{solution}{Forensic Intake Procedure}{forensicintake}
+A \textbf{Forensic Mode} flag at boot activates an intake procedure that precedes all other operations:
+\begin{enumerate}[noitemsep]
+  \item Device serial number (from \texttt{smartctl} output) is recorded and operator-confirmed
+  \item Case reference number is entered (free text, mandatory field)
+  \item Examining officer identifier is recorded
+  \item Explicit authority basis is selected: \{warrant, owner consent, employer authorisation, court order\}
+  \item System time is operator-confirmed or manually set
+\end{enumerate}
+These fields are prepended to the audit log genesis record $h_0$ and included in the signed session report. The output document is formatted to meet ACPO (UK) and SWGDE (US) guidelines for digital evidence documentation.
+\end{solution}
+
+\section{Jurisdiction-Specific Legal Constraints}
+
+\begin{edgecase}{Unauthorised Decryption Liability}{jurisdiction}
+In several jurisdictions (UK~RIPA~2000 Part~III, US~5th Amendment jurisprudence in some circuits, Singapore~CMA), decrypting a drive without proper legal authority is itself an offence. The current disclaimer screen has no mechanism to capture authority documentation.
+\end{edgecase}
+
+\begin{solution}{Authority Documentation Capture}{authcapture}
+The disclaimer screen is restructured from a one-click acknowledgement to a structured authority declaration. The operator must explicitly select one of: device owner, authorised representative (with name field), law enforcement (with warrant number field), or corporate IT (with policy reference field). Selecting ``law enforcement'' activates Forensic Mode automatically. The declaration is signed into the audit log and cannot be retrospectively altered (Theorem~\ref{thm:tamper}).
+\end{solution}
+
+\section{Filesystem Timestamp Contamination}
+
+\begin{edgecase}{atime Updates on Forensic Read}{atimecont}
+Some \texttt{ext4} superblock implementations update the last-mounted timestamp on any mount, even in read-only mode. This modifies evidence and is impermissible in forensic contexts.
+\end{edgecase}
+
+\begin{solution}{Superblock-Safe Mount Protocol}{safemount}
+CipherRescue never mounts filesystems via the OS mount subsystem during a session. All filesystem access is performed via raw sector reads or through libext2fs/libntfs-3g APIs that do not invoke the kernel mount path. If a mount is required for a specific action (e.g., reading a VeraCrypt keyfile from a mounted volume), the mount uses \texttt{noatime,nodiratime,ro} flags and the superblock is read directly to verify no write occurred post-mount (checksum comparison of superblock before and after).
+\end{solution}
+
+\section{Clock Accuracy in Air-Gapped Environments}
+
+\begin{edgecase}{Invalid Timestamps Without NTP}{airgap}
+In air-gapped environments, NTP is unavailable and the system RTC may be wrong (dead CMOS battery is common on neglected hardware). Audit log entries with timestamps in 1970 are legally problematic and operationally confusing.
+\end{edgecase}
+
+\begin{solution}{Time Verification Protocol}{timeprotocol}
+At the \texttt{INIT} state, before any other action:
+\begin{enumerate}[noitemsep]
+  \item NTP sync is attempted on all available interfaces with a 5-second timeout
+  \item If NTP fails, the system displays the current RTC time and requires the operator to confirm or correct it
+  \item The audit log records the time source (\texttt{NTP\_SYNCED}, \texttt{OPERATOR\_CONFIRMED}, or \texttt{RTC\_UNVERIFIED}) in the genesis record
+  \item Sessions with \texttt{RTC\_UNVERIFIED} are flagged in the session report
+\end{enumerate}
+\end{solution}
+
+\chapter{Enterprise and Operational Edge Cases}
+
+\section{Headless Server Recovery}
+
+\begin{edgecase}{No Display Output on Recovery Target}{headless}
+A rack-mounted server accessed via IPMI/iDRAC/iLO has no physical display. The current TUI assumes a terminal. Headless recovery is a common enterprise scenario but is not addressed in v1.0.
+\end{edgecase}
+
+\begin{solution}{Serial Console and Web Management Interface}{headlessolution}
+Two modes are added:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Serial console mode:} The bootloader activates a serial console (\texttt{console=ttyS0,115200}) alongside the VGA console. The TUI is rendered in plain-text mode on serial. This is bootloader-configurable at ISO build time.
+  \item \textbf{Web management interface (v1.1+):} A lightweight Flask server running on the live image exposes the TUI workflow as a JSON API and HTML5 interface accessible over the BMC's network interface. Access is authenticated via a session token displayed on the serial console at boot.
+\end{enumerate}
+\end{solution}
+
+\section{Key Escrow Integration}
+
+\begin{edgecase}{Enterprise Credentials in PAM Systems}{escrow}
+In enterprise environments, BitLocker recovery keys are stored in Active Directory / Azure AD, LUKS passphrases in HashiCorp Vault, and Opal SED credentials in CyberArk. Requiring operators to copy credentials manually introduces error and security risk.
+\end{edgecase}
+
+\begin{solution}{Escrow Adapter Layer}{escrowadapter}
+An \texttt{EscrowAdapter} abstract interface is added to the plugin contract. Bundled adapters for v1.1:
+\begin{itemize}[noitemsep]
+  \item \texttt{ActiveDirectoryEscrow}: retrieves BitLocker recovery keys from AD via LDAP query using the drive's GUID
+  \item \texttt{VaultEscrow}: retrieves secrets from HashiCorp Vault via the KV v2 API
+  \item \texttt{MSAADEscrow}: retrieves BitLocker keys from Microsoft Entra ID (formerly Azure AD) via the Graph API
+\end{itemize}
+Credentials retrieved via escrow are never displayed to the operator --- they are passed directly to the plugin's authenticate method and zeroed immediately after use.
+\end{solution}
+
+\section{Partial Backup on Insufficient Destination Space}
+
+\begin{edgecase}{Destination Capacity Smaller Than Source}{spacegap}
+A 4\,TB source drive with a 2\,TB backup destination. The current architecture's response is undefined --- presumably the backup fails and the session halts. In practice, a partial backup may be preferable to no backup.
+\end{edgecase}
+
+\begin{solution}{Tiered Backup Policy}{tieredbackup}
+The BackupManager implements a three-tier backup policy, presented to the operator when full backup is not possible:
+\begin{enumerate}[noitemsep]
+  \item \textbf{Full image} (requires destination $\geq$ source): complete sector-level copy
+  \item \textbf{Critical-regions backup} (requires $\sim$500\,MB): encryption headers, partition tables, MBR/GPT, first and last 100\,MB, SMART snapshot, and session metadata
+  \item \textbf{Metadata-only backup} (requires $\sim$10\,MB): encryption headers and partition metadata only; blocks all \texttt{HIGH} and \texttt{DESTRUCTIVE} operations
+\end{enumerate}
+The tier selected is recorded in the \texttt{BackupToken} and constrains which recovery actions are available. \texttt{DESTRUCTIVE} actions are only available with a Tier~1 backup.
+\end{solution}
+
+\section{Concept Drift in Training Data}
+
+\begin{edgecase}{Evolving Encryption Standards}{conceptdrift}
+As encryption standards evolve (LUKS3, BitLocker AES-256 replacing AES-128, VeraCrypt new hash algorithms), the signal distributions shift. The deployed ONNX model, trained on synthetic data from 2025, may misclassify signal patterns from future scheme versions.
+\end{edgecase}
+
+\begin{solution}{Drift Detection and Retraining Pipeline}{driftpipeline}
+A lightweight drift detector runs offline against community-contributed anonymised session data. It computes the Maximum Mean Discrepancy (MMD) between the training feature distribution and the distribution of recent inference inputs:
+\[
+  \mathrm{MMD}^2(\mathcal{T}, \mathcal{I}) = \left\| \frac{1}{|\mathcal{T}|}\sum_{x \in \mathcal{T}} \phi(x) - \frac{1}{|\mathcal{I}|}\sum_{x \in \mathcal{I}} \phi(x) \right\|_{\mathcal{H}}^2
+\]
+where $\phi$ is a kernel embedding (RBF kernel). When $\mathrm{MMD}^2 > \tau_{\rm drift}$ (calibrated at $3\sigma$ above baseline), a retraining trigger is issued and announced in the project repository. The retraining pipeline is fully automated (GitHub Actions) given labelled data above the threshold established in Proposition~5.2.
+\end{solution}
+
+\section{Multi-Device SCPR Correlation}
+
+\begin{edgecase}{Cross-Device Signal Correlation in RAID/LVM}{multidevice}
+In RAID or LVM configurations, a power failure that corrupts the LUKS header on drive~A may simultaneously produce the \texttt{power\_fail\_flag} signal on drives B and C. The current SCPR instance is defined per-device. Treating each device independently may produce redundant diagnoses that miss the common root cause.
+\end{edgecase}
+
+\begin{solution}{Multi-Device SCPR Formulation}{multidevicescpr}
+This is identified as a research extension (target: P1 publication). The multi-device SCPR instance is:
+\[
+  \calU_{\rm multi} = \bigcup_{d \in D_{\rm RAID}} \Sigma(d), \quad \calF_{\rm multi} = \calF \cup \calF_{\rm common}
+\]
+where $\calF_{\rm common}$ includes cross-device failure modes such as \texttt{power\_event\_all} and \texttt{controller\_failure}. Cross-device signals are modelled with shared entries in $\calU_{\rm multi}$ --- a single \texttt{power\_fail\_flag} entry covers the same event detected on multiple drives. The LP formulation extends naturally; the covering matrix $A$ gains rows for common failure modes. This formulation is the primary novel contribution of the extended journal version.
+\end{solution}
+
+\section{User-Facing Recoverability Assessment}
+
+\begin{edgecase}{Technical Output Inaccessible to Non-Expert Operators}{recoverability}
+The \texttt{FailureReport} outputs failure mode IDs and LP confidence scores. A non-expert operator --- a layman recovering a deceased family member's drive, or a first responder with no IT background --- cannot interpret this output to make informed decisions.
+\end{edgecase}
+
+\begin{solution}{Plain-English Recoverability Classification}{plainenglish}
+A \texttt{RecoverabilityClassifier} maps the \texttt{FailureReport} to a three-level assessment displayed prominently at the top of the report, before any technical detail (see Table~\ref{tab:recoverability}). A ``Pre-flight Credential Check'' is also added at the \texttt{INIT} state: ``Do you have your recovery key or passphrase? If not, this tool cannot assist you.'' This prevents non-expert operators from going through enumeration and backup only to discover at the \texttt{AUTH} state that they lack credentials.
+\end{solution}
+
+\begin{table}[htbp]
+\centering
+\caption{Recoverability classification for non-expert display}
+\label{tab:recoverability}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Class} & \textbf{Displayed Text} & \textbf{Criteria} \\
+\midrule
+\textcolor{forestgreen}{\textbf{Likely recoverable}} & ``Your data is very likely recoverable'' & $C^* \subseteq \{F_{01}, F_{02}, F_{03}\}$, gap $= 0$ \\
+\textcolor{amber}{\textbf{Partially recoverable}} & ``Some data may be recoverable'' & $F_{04} \in C^*$ or $F_{07} \in C^*$ \\
+\textcolor{crimson}{\textbf{At risk}} & ``Data loss is possible; act carefully'' & $F_{05} \in C^*$ or uncovered $\neq \emptyset$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{Systematic Literature Review}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\chapter{SLR Protocol}
+
+This review follows PRISMA 2020 guidelines \citep{page2021}.
+
+\begin{table}[htbp]
+\centering
+\caption{SLR search parameters}
+\label{tab:slrprotocol}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Detail} \\
+\midrule
+Databases & ACM DL, IEEE Xplore, arXiv (cs.CR, cs.DS), SpringerLink, USENIX, NDSS, CCS \\
+Date range & 1972--2025 \\
+Language & English only \\
+Inclusion & Peer-reviewed; directly addresses topic; proposes or evaluates system/algorithm \\
+Exclusion & Grey literature; purely theoretical without application; inaccessible full text \\
+\midrule
+\textbf{RQ1 strings} & \texttt{("full disk encryption" OR FDE OR BitLocker OR LUKS) AND recovery} \\
+ & \texttt{"disk encryption" AND "automated recovery"} \\
+ & \texttt{"encryption recovery" AND "open source"} \\
+\textbf{RQ2 strings} & \texttt{("set covering" AND reasons) OR SCPR} \\
+ & \texttt{"set cover" AND "fault diagnosis"} \\
+ & \texttt{"minimum hitting set" AND diagnosis} \\
+ & \texttt{"model-based diagnosis" AND covering} \\
+ & \texttt{"set cover" AND interpretable AND "machine learning"} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\chapter{RQ1 --- Full-Disk Encryption Recovery}
+
+\section{Theme A --- Encryption Scheme Specifications}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Foundational encryption scheme literature}\label{tab:themeA}\\
+\toprule
+\textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\
+\midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\ \midrule
+\endhead
+\citet{ferguson2006} & 2006 & Foundational BitLocker sector-level operations and header structure \\
+Fruhwirt et al.\ --- LUKS1 specification & 2005 & LUKS on-disk format, keyslot structure, anti-forensic splitting \\
+\citet{broz2018} & 2018 & JSON metadata, integrity extensions, token mechanism \\
+\citet{tcg2015} & 2015 & TCG Opal 2.0 standard; SP commands; PSID revert \\
+\citet{menz2023} & 2023 & Header-free system encryption, PIM factor, rescue disk \\
+\bottomrule
+\end{longtable}
+
+\section{Theme B --- Disk Forensics and Recovery}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Disk forensics literature}\label{tab:themeB}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\ \midrule
+\endhead
+\citet{casey2011} & 2011 & Forensically sound operations; write-blocking; evidence chain \\
+\citet{garfinkel2012} & 2012 & Standardised forensic metadata; informs AuditLog format \\
+\citet{ligh2014} & 2014 & Key material exposure; credential zeroing protocol \\
+\citet{harbawi2017} & 2017 & Structured acquisition workflow with integrity gates \\
+\citet{poisel2013} & 2013 & LUKS header backup/restore as sound recovery technique \\
+\bottomrule
+\end{longtable}
+
+\section{Theme C --- Automated Failure Detection in Storage}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Storage failure detection literature}\label{tab:themeC}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Relevance} \\ \midrule
+\endhead
+\citet{pinheiro2007} & 2007 & Validates SMART weight assignments (Def.~6.4); confirms attributes 5, 187, 197, 198 as most predictive \\
+\citet{backblaze2024} & 2024 & 200k-drive longitudinal dataset; used to calibrate $w_i$ \\
+\citet{murray2022} & 2022 & Isotonic regression for confidence calibration \\
+\citet{botezatu2016} & 2016 & RF on Backblaze data; validates RF for offline reason-weight learning \\
+Xu et al.\ --- Improving Service Availability with Disk Error Prediction & 2018 & ML superiority over SMART threshold methods \\
+\bottomrule
+\end{longtable}
+
+\section{Theme D --- Tool Landscape Gap Analysis}
+
+\begin{table}[htbp]
+\centering
+\caption{Gap analysis: existing tools vs.\ CipherRescue}
+\label{tab:gapanalysis}
+\small
+\begin{tabular}{@{}llllllllll@{}}
+\toprule
+\textbf{Tool} & \textbf{Type} & \textbf{Schemes} & \textbf{Guided} & \textbf{Safety} & \textbf{ML} & \textbf{Audit} & \textbf{OSS} & \textbf{Forensic} & \textbf{LP-Opt} \\
+\midrule
+McAfee DETech  & Prop.\ WinPE  & 1    & P          & $\times$   & $\times$  & $\times$   & $\times$  & $\times$   & $\times$   \\
+Kali Linux     & Pentesting    & P    & $\times$   & $\times$   & $\times$  & $\times$   & \checkmark & $\times$   & $\times$   \\
+Rescuezilla    & Imaging       & None & P          & $\times$   & $\times$  & $\times$   & \checkmark & $\times$   & $\times$   \\
+cryptsetup     & CLI           & LUKS & $\times$   & $\times$   & $\times$  & $\times$   & \checkmark & $\times$   & $\times$   \\
+dislocker      & CLI           & BL   & $\times$   & $\times$   & $\times$  & $\times$   & \checkmark & $\times$   & $\times$   \\
+Elcomsoft FDD  & Comm.\ Win    & P    & P          & $\times$   & $\times$  & $\times$   & $\times$  & $\times$   & $\times$   \\
+\textbf{CipherRescue} & \textbf{OS Linux} & \textbf{5+} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}\\[4pt]
+{\footnotesize P = partial; OSS = open-source; BL = BitLocker; Prop.\ = proprietary; Comm.\ = commercial; LP-Opt = LP-optimal diagnosis}
+\end{table}
+
+\chapter{RQ2 --- SCPR Theoretical Lineage}
+
+\section{Preamble: The Primary SCPR Lineage}
+
+Before examining the broader theoretical landscape, it is essential to establish the direct intellectual lineage of the SCPR itself. Three works constitute this primary lineage and must be distinguished from SCPR-adjacent formalisms treated in subsequent themes.
+
+\begin{tcolorbox}[enhanced, colback=lightpurple!20, colframe=purple, arc=4pt, title={Primary SCPR Lineage --- Three Works in Chronological Order}, fonttitle=\bfseries]
+\textbf{Genesis (2022):} \citet{sadeghimanesh2022smt} coined the term \emph{Set Covering Problem with Reasons} in the context of Conflict-Driven Cylindrical Algebraic Covering (CDCAC) for SMT(NRA) solving. The paper identified the optimisation problem and named it, but provided no full formalisation or systematic algorithmic study.\\[6pt]
+\textbf{Formalisation (2025):} \citet{babatunde2025thesis} provided the first complete formalisation of SCPR as an independent mathematical object: formal definition, generalisation of Beasley's reduction process from SCP to SCPR, exact and heuristic algorithms, synthetic benchmark dataset, and two domain applications (CDCAC and Functional Enrichment Analysis).\\[6pt]
+\textbf{First Publication (2026):} \citet{babatunde2026arxiv} applied the full SCPR apparatus --- formalisation, generalised Beasley reduction, LP solver --- to the original CDCAC application. Key result: the Beasley reduction alone solves 95.5\% of CDCAC-derived SCPR instances; LP solves the remaining 4.5\% in under 1\,ms per instance.
+\end{tcolorbox}
+
+\begin{longtable}{@{}p{7cm}rp{5.5cm}@{}}
+\caption{Primary SCPR lineage --- works that constitute SCPR as a field}\label{tab:scprlineage}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Role in Lineage} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Role in Lineage} \\ \midrule
+\endhead
+\citet{sadeghimanesh2022smt} & 2022 & \textbf{Genesis.} Coined the term SCPR. Identified the optimisation problem in CDCAC/SMT(NRA). No formalisation; no algorithmic study. Motivating paper for the entire SCPR research programme. \\[4pt]
+\citet{babatunde2025thesis} & 2025 & \textbf{Formalisation.} First systematic study of SCPR. Formal definition; generalised Beasley reduction process; exact and heuristic solvers; synthetic benchmark dataset; applications to CDCAC and FEA. Established SCPR as an independent research object. \\[4pt]
+\citet{babatunde2026arxiv} & 2026 & \textbf{First publication.} Applies full SCPR apparatus to CDCAC. Beasley reduction solves 95.5\% of instances; LP solves remainder in $<$1\,ms. CipherRescue is the \emph{third} domain application of SCPR. \\
+\bottomrule
+\end{longtable}
+
+\begin{tcolorbox}[enhanced, colback=lightamber!40, colframe=amber, arc=4pt, fonttitle=\bfseries,
+  title={Terminological Note for CipherRescue Papers}]
+The phrase ``Beasley reduction process'' is used throughout, following the terminology of the primary lineage \citep{babatunde2025thesis,babatunde2026arxiv}. This reflects Beasley's own language in the 1987 and 1990 papers \citep{beasley1987,beasley1990}, which describe a \emph{reduction} of the ILP instance. The broader integer programming literature uses ``LP-based variable fixing'' for the same mechanism. Where CipherRescue papers are submitted to venues with a general IP readership, the following bridging note is inserted on first use: \emph{``We apply Beasley's reduction process \citep{beasley1987} --- referred to in the broader integer programming literature as LP-based variable fixing ---~to...''}
+\end{tcolorbox}
+
+\section{Theme E --- Set Cover Foundations}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Set cover foundational literature}\label{tab:themeE}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Contribution} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Contribution} \\ \midrule
+\endhead
+\citet{karp1972} & 1972 & NP-completeness of Set Cover (Theorem~\ref{thm:nphard}) \\
+\citet{beasley1987} & 1987 & LP + reduction process; directly implements Algorithm~\ref{alg:beasley} \\
+\citet{beasley1990} & 1990 & Tighter bounds via Lagrangian relaxation; theoretical basis for Phase~2 \\
+\citet{vazirani2001} & 2001 & LP-relaxation and primal-dual methods; strong duality (Theorem~\ref{thm:lpduality}) \\
+\bottomrule
+\end{longtable}
+
+\section{Theme F --- Model-Based Diagnosis}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Model-based diagnosis literature and relationship to SCPR}\label{tab:themeF}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Contribution and Gap} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Contribution and Gap} \\ \midrule
+\endhead
+\citet{reiter1987} & 1987 & Minimal hitting sets; no structured reasons; no storage domain \\
+\citet{dekleer1987} & 1987 & GDE / conflict sets; lacks LP optimality and reason annotation \\
+\citet{struss1989} & 1989 & Abnormality modes parallel $\calF$; no covering formulation \\
+\citet{console1991} & 1991 & Equivalence between abductive and consistency diagnosis \\
+\citet{genesereth1984} & 1984 & Early structured explanation; precursor to SCPR reasons \\
+\bottomrule
+\end{longtable}
+
+\section{Theme G --- SCPR-Adjacent Formalisms}
+
+These works share structural features with SCPR but were developed independently and do not constitute the SCPR lineage. They validate the interpretability claims of the CipherRescue diagnostic engine.
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{SCPR-adjacent formalisms}\label{tab:themeG}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Relationship to SCPR} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Relationship to SCPR} \\ \midrule
+\endhead
+\citet{liffiton2016} & 2016 & Minimal Unsatisfiable Subsets structurally analogous to reason sets $R_i$ \\
+\citet{ignatiev2019} & 2019 & Abductive explanations $\equiv$ SCPR reason sets; validates interpretability claim \\
+\citet{marquessilva2021} & 2021 & Monotone classification explanations; formal certificate structure \\
+\citet{davies2013} & 2013 & Weighted MaxSAT casting of covering-with-reasons; alternative exact solver \\
+\citet{cimatti2021} & 2021 & Structured explanations in formal verification; grounds reason annotation \\
+\bottomrule
+\end{longtable}
+
+\section{Theme H --- SCPR in Bioinformatics}
+
+\begin{longtable}{@{}p{5.5cm}rp{7cm}@{}}
+\caption{Bioinformatics FEA literature and structural parallel}\label{tab:themeH}\\
+\toprule \textbf{Reference} & \textbf{Year} & \textbf{Parallel to CipherRescue} \\ \midrule
+\endfirsthead
+\multicolumn{3}{c}{\tablename\ \thetable{} (continued)}\\ \toprule \textbf{Reference} & \textbf{Year} & \textbf{Parallel to CipherRescue} \\ \midrule
+\endhead
+\citet{subramanian2005} & 2005 & Universe = genes; sets = pathways; cover = diagnosis (identical structure) \\
+\citet{eden2009} & 2009 & Minimum set cover for parsimonious GO term explanations; LP-based \\
+\citet{huang2009} & 2009 & 68 tools surveyed; none use reason-annotated covering: same gap in FDE \\
+\bottomrule
+\end{longtable}
+
+\section{SLR Findings Summary}
+
+\begin{tcolorbox}[enhanced, colback=lightgreen!30, colframe=forestgreen, title={Finding 1 --- Tool Gap Confirmed}, fonttitle=\bfseries, arc=4pt]
+No existing open-source tool combines automated multi-scheme FDE detection, guided recovery workflow, mandatory backup gating, forensic-mode audit logging, LP-optimal SCPR diagnosis, and evidence-grade reporting. Table~\ref{tab:gapanalysis} confirms CipherRescue occupies an unoccupied position across all criteria.
+\end{tcolorbox}
+
+\vspace{6pt}
+
+\begin{tcolorbox}[enhanced, colback=lightblue!30, colframe=royalblue, title={Finding 2 --- Theoretical Gap Confirmed}, fonttitle=\bfseries, arc=4pt]
+No prior work applies a covering-with-reasons formalism, LP-solved and dual-annotated, to FDE failure diagnosis. The SCPR primary lineage (Table~\ref{tab:scprlineage}) has been applied to two domains --- CDCAC/SMT solving and Functional Enrichment Analysis in bioinformatics. CipherRescue constitutes the third domain application. Closest diagnosis precursors \citep{reiter1987,ignatiev2019} lack structured reasons and storage domain application respectively.
+\end{tcolorbox}
+
+\vspace{6pt}
+
+\begin{tcolorbox}[enhanced, colback=lightpurple!40, colframe=purple, title={Finding 3 --- Third Domain Application of SCPR}, fonttitle=\bfseries, arc=4pt]
+SCPR was originally developed for CDCAC/SMT(NRA) solving \citep{sadeghimanesh2022smt} and subsequently applied to Functional Enrichment Analysis in bioinformatics \citep{babatunde2025thesis}. CipherRescue is the \textbf{third distinct domain application} of SCPR --- to cryptographic storage failure diagnosis. This cross-domain reach, from formal methods to computational biology to systems security, demonstrates the generality of the SCPR formulation and constitutes a distinct publishable contribution establishing SCPR as a broadly applicable optimisation paradigm.
+\end{tcolorbox}
+
+\vspace{6pt}
+
+\begin{tcolorbox}[enhanced, colback=lightamber!50, colframe=amber, title={Finding 4 --- FDE-Domain SCPR Benchmark Gap}, fonttitle=\bfseries, arc=4pt]
+The SCPR benchmark suite published by \citet{babatunde2025zenodo} provides the first public SCPR test library --- addressing the gap noted in the thesis \citep{babatunde2025thesis} that no library analogous to the Beasley OR-Library \citep{beasley1990} existed for SCPR. However, that dataset is derived from synthetic instances and CDCAC/FEA applications. No domain-validated SCPR benchmark derived from real-world \emph{cryptographic storage} failure cases exists. CipherRescue's community data pipeline will produce the first such dataset as a byproduct of operational deployment, extending the existing benchmark library to a third application domain.
+\end{tcolorbox}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{Publication Roadmap and Project Governance}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\chapter{Publication Strategy}
+
+\section{Situating CipherRescue within the Existing Publication Record}
+
+Before presenting the CipherRescue publication roadmap, it is necessary to locate this work within the existing SCPR publication record, which is more advanced than earlier versions of this document reflected.
+
+\begin{tcolorbox}[enhanced, colback=lightteal!30, colframe=tealgreen, arc=4pt, fonttitle=\bfseries,
+  title={Existing SCPR Publications (Prior to CipherRescue Papers)}]
+\textbf{[E1]} \citet{sadeghimanesh2022smt}. \textbf{Status: Published.}\\[6pt]
+\textbf{[E2]} \citet{babatunde2025thesis}. \textbf{Status: Conferred.}\\[6pt]
+\textbf{[E3]} \citet{babatunde2026arxiv}. Submitted to \textit{Journal of Discrete Optimisation} (Elsevier). \textbf{Status: Under review.}
+\end{tcolorbox}
+
+CipherRescue papers therefore enter an established publication record. They do not need to establish SCPR's existence or prove its origins --- that work is done. They cite [E1] as genesis, [E2] as formalisation, and [E3] as the first full application paper.
+
+\section{CipherRescue Publication Roadmap}
+
+\begin{table}[htbp]
+\centering
+\caption{CipherRescue publication roadmap}
+\label{tab:pubroad}
+\begin{tabular}{@{}llp{4.5cm}lp{3cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Venue} & \textbf{Claim} & \textbf{Timeline} & \textbf{SLR Basis} \\
+\midrule
+P1 & USENIX Security / IEEE S\&P & SCPR as third-domain application: LP-optimal FDE failure diagnosis, dual-variable evidence annotation, empirical validation & 12--16 mo & Finding 2 \\
+P2 & NDSS / ACM CCS & CipherRescue system paper: full implementation, 5-scheme evaluation, forensic mode, SCPR benchmark extension & 14--18 mo & Finding 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The previously planned P3 (BMC Bioinformatics cross-domain transfer paper) is superseded by the existing publication record: [E3] already establishes SCPR as a cross-domain formalism applicable beyond bioinformatics. CipherRescue papers cite [E1]--[E3] to establish theoretical grounding and proceed directly to the novel FDE application. P1 is the priority submission. It can be drafted once Layer~5 (the SCPR diagnostic engine) has an implementation and empirical results against real encrypted drives.
+
+\chapter{Open-Source Governance and Intellectual Property}
+
+\section{Licensing Strategy}
+
+CipherRescue uses a dual-layer IP strategy:
+
+\begin{enumerate}
+  \item \textbf{Code:} Apache~2.0. Permissive licence permitting use, modification, and distribution in both open-source and proprietary downstream products without copyleft obligation. Apache~2.0 is chosen deliberately over GPL-3.0 to maximise industry adoption --- enterprise security teams, forensic service providers, and government IT departments frequently operate under policies that prohibit GPL-licensed dependencies in operational tooling. Broad deployment is a prerequisite for the community data pipeline (Section~\ref{sec:comp4}) that produces the SCPR benchmark dataset. Apache~2.0 also includes an explicit patent non-aggression clause, reducing legal risk for organisations integrating CipherRescue into enterprise workflows. The trademark layer (item~2 below) provides the competitive protection that copyleft would otherwise supply through the GPL mechanism.
+  \item \textbf{Name:} Trademark registration in UK (Class 9, software) and EU (EUIPO) before first public release. Forks must rename. The official signed ISO bearing the ``CipherRescue'' trademark is the canonical, auditable release. This follows the Mozilla Firefox / Iceweasel model precisely.
+  \item \textbf{Documentation:} CC-BY-4.0. Papers and technical documents are freely shareable with attribution.
+  \item \textbf{SCPR Benchmark Dataset:} CC-BY-4.0 with additional terms prohibiting use in criminal circumvention of encryption.
+\end{enumerate}
+
+\section{Competitive Durability}
+
+Code alone creates no durable advantage in open source. Four compounding assets do:
+
+\begin{description}
+  \item[The SCPR Benchmark Dataset] Every contributing recovery session adds anonymised feature vectors to the first domain-validated SCPR test library. A fork on day one has no data. A fork on day 1,000 is playing catch-up against a dataset that has been accumulating for three years. This mirrors the network effect of ImageNet.
+  \item[Academic Priority] Once P1 and P2 are published, the intellectual lineage is established in the literature. Competing systems built on the published formulation cite this work. Open source accelerates this: broader usage $\to$ more citations $\to$ stronger domain authority.
+  \item[Trademark] Protects brand integrity. Users can distinguish the audited canonical release from forks. Organisations writing procurement policies for digital forensics tools can specify ``CipherRescue'' unambiguously.
+  \item[Community Governance] The founding maintainer defines the plugin architecture, contribution standards, and ethical framework. Open source projects accumulate inertia around their founding design decisions --- Linux kernel architecture decisions from 1991 still shape the codebase.
+\end{description}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{Empirical Validation and Experimental Design}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\chapter{Empirical Validation and Experimental Design Framework}
+\label{ch:empirical}
+
+This chapter documents the empirical validation strategy and experimental design framework
+for CipherRescue. It addresses three distinct validation objectives---code correctness,
+functional usability, and comparative advantage---together with the specifications for two
+community infrastructure components: the SCPR instance generator and the public problem
+instance library. Each section identifies the research question being answered, the
+methodology, the viability constraints, and the planned development phase.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Overview and Validation Objectives}
+\label{sec:empirical:overview}
+
+CipherRescue makes claims across three distinct layers that require empirical evidence.
+Table~\ref{tab:validationobj} summarises the objectives, methods, and phasing.
+
+\begin{table}[htbp]
+\centering
+\caption{Validation objectives, methods, and phases}
+\label{tab:validationobj}
+\begin{tabular}{@{}p{2.2cm}p{4.8cm}p{4.8cm}l@{}}
+\toprule
+\textbf{Layer} & \textbf{Research Question} & \textbf{Validation Method} & \textbf{Phase} \\
+\midrule
+Correctness &
+  Does the SCPR engine produce LP-optimal diagnoses agreeing with known ground truth? &
+  Synthetic device profiles with pre-specified failure modes &
+  Immediate \\[6pt]
+Functional coverage &
+  Does the end-to-end recovery workflow operate correctly across all schemes and failure modes? &
+  Controlled test corpus via loopback devices and VM-based failure injection &
+  Phase~2 \\[6pt]
+Comparative advantage &
+  Is LP-optimal diagnosis demonstrably better than greedy approximation on FDE-domain instances? &
+  Empirical benchmark: LP vs.\ greedy on a standardised instance set &
+  Phase~1--2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[enhanced, colback=lightblue!40, colframe=royalblue, arc=4pt,
+  fonttitle=\bfseries, title={Design Principle}]
+Every validation stream is designed to produce artefacts that are independently
+publishable: the synthetic corpus as a benchmark dataset, the functional test suite as a
+reproducibility package, and the comparative results as empirical evidence for the P1
+theory paper.
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Stream 1: Code Validation via Synthetic Device Profiles}
+\label{sec:empirical:stream1}
+
+\subsection{Objective}
+
+To verify that the SCPR diagnostic engine produces certifiably correct LP-optimal covering
+solutions on FDE-domain problem instances where the ground-truth diagnosis is known in
+advance.
+
+\subsection{Methodology}
+
+Synthetic FDE device profiles are generated using the SCPR data generation framework.
+Each profile specifies a device state---a combination of observable signals drawn from the
+failure mode taxonomy (Table~\ref{tab:failuremodes})---together with the pre-specified
+ground-truth failure mode(s) responsible for those signals. The engine is then run on each
+profile and its solution verified against the known optimum.
+
+Three correctness properties are checked per instance:
+
+\begin{enumerate}[label=\textbf{C\arabic*.}]
+  \item \textbf{Coverage completeness.} Every signal $\sigma_j \in \Sigma_{\mathrm{obs}}$
+    is entailed by at least one reason in the returned solution $R^*$.
+  \item \textbf{Optimality certificate.} The LP duality gap
+    $\delta = z_{\mathrm{LP}} - z_{\mathrm{ILP}}$ is recorded. When $\delta = 0$ the ILP
+    solution is certified optimal by strong duality (Theorem~\ref{thm:lpduality}). When
+    $\delta > 0$ the instance is flagged for deeper analysis.
+  \item \textbf{Ground-truth agreement.} The returned reason set $R^*$ contains the
+    pre-specified ground-truth failure mode(s) and does not include spurious reasons not
+    warranted by the signal set.
+\end{enumerate}
+
+\subsection{Instance Generation Specification}
+
+The synthetic corpus is generated across the parameter ranges shown in
+Table~\ref{tab:instancespec} to ensure coverage of both simple and structurally complex
+instances.
+
+\begin{table}[htbp]
+\centering
+\caption{Synthetic corpus parameter specification}
+\label{tab:instancespec}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Range / Values} & \textbf{Rationale} \\
+\midrule
+$|\calU|$ (signal count)  & $5$--$50$                         & Single-failure to multi-failure complex scenarios \\
+$|\calF|$ (reason count)  & $7$--$35$                         & Base $F_{01}$--$F_{07}$ plus composite/concurrent failures \\
+Entailment density        & $0.1$--$0.6$                      & Near-unique diagnosis to high-ambiguity instances \\
+Cost distribution         & Uniform, Gaussian, adversarial    & Tests solver robustness across cost landscapes \\
+Ground-truth modes        & 1, 2, or 3 concurrent             & Validates multi-failure concurrent diagnosis \\
+Instances per cell        & $\geq 20$                         & Statistical stability for aggregate correctness metrics \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Existing Benchmark Data}
+
+Preliminary validation has already been conducted across seven instance categories derived
+from the SCPR benchmark suite \citep{babatunde2025thesis}. Small CDCAC QFE instances
+resolve fully via Beasley reduction and match known optimal solutions exactly. The
+LP--ILP integrality gaps observed in larger instances reflect LP relaxation bounds rather
+than solver failures, confirming the exactness of the ILP formulation. The FDE-domain
+synthetic corpus described above extends this foundation with domain-specific instance
+structure derived from the failure mode taxonomy.
+
+\begin{tcolorbox}[enhanced, colback=lightgreen!40, colframe=forestgreen, arc=4pt,
+  fonttitle=\bfseries, title={Viability: High}]
+No significant constraint. The data generation framework exists and has been validated
+\citep{babatunde2025thesis}. FDE-domain instance generation requires only the addition of
+the entailment knowledge base (Section~\ref{sec:scpr}) as the structural prior.
+Estimated engineering effort: 2--3 weeks.
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Stream 2: Functional Usability Testing with Encrypted Devices}
+\label{sec:empirical:stream2}
+
+\subsection{Objective}
+
+To verify that the end-to-end CipherRescue workflow---detection, diagnosis, backup,
+authentication, action execution, and audit log generation---operates correctly on
+representative encrypted drive configurations under each of the seven defined failure
+modes (Table~\ref{tab:failuremodes}).
+
+\subsection{Test Corpus Architecture}
+
+Rather than acquiring physical devices for each configuration, the primary test corpus is
+constructed using loopback devices and QEMU-based VM environments, which provide full
+control over failure state induction and are reproducible across testing environments.
+Physical hardware testing is planned for a subset of configurations that cannot be
+faithfully emulated: specifically $F_{04}$ (physical sector degradation) and Opal SED
+configurations.
+
+Table~\ref{tab:testmatrix} presents the test matrix of scheme $\times$ failure mode
+combinations. \textbf{VM} = loopback device or QEMU image; \textbf{Phys} = physical drive
+with \texttt{dd}-induced failure or hardware fault; \textbf{---} = not applicable to the
+scheme.
+
+\begin{table}[htbp]
+\centering
+\caption{Scheme $\times$ failure mode test matrix}
+\label{tab:testmatrix}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Failure Mode} & \textbf{BitLocker} & \textbf{LUKS1} & \textbf{LUKS2} & \textbf{VeraCrypt} & \textbf{Opal SED} \\
+\midrule
+$F_{01}$: Corrupted header       & VM   & VM   & VM   & VM   & ---  \\
+$F_{02}$: Damaged MBR/GPT        & VM   & VM   & VM   & VM   & ---  \\
+$F_{03}$: Corrupted PBA          & VM   & ---  & ---  & VM   & VM   \\
+$F_{04}$: Physical degradation   & Phys & Phys & Phys & Phys & Phys \\
+$F_{05}$: Key material loss      & VM   & VM   & VM   & VM   & ---  \\
+$F_{06}$: Filesystem corruption  & VM   & VM   & VM   & VM   & ---  \\
+$F_{07}$: Incomplete encryption  & VM   & VM   & VM   & VM   & ---  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Failure State Induction Methods}
+
+\begin{description}[leftmargin=2em]
+  \item[$F_{01}$] \texttt{dd} overwrite of the first 512 bytes of the scheme header with
+    random data; SHA-256 verification of the induced corruption.
+  \item[$F_{02}$] Selective overwrite of partition table sectors; GPT backup corruption
+    for UEFI targets.
+  \item[$F_{03}$] Modification of pre-boot authentication binary using a hex editor on the
+    relevant partition sectors.
+  \item[$F_{04}$] Physical drives with elevated SMART reallocated sector counts;
+    supplemented by \texttt{dm-flakey} device mapper target in VM environments for
+    controlled I/O error injection.
+  \item[$F_{05}$] Recovery key intentionally withheld; escrow token invalidated.
+  \item[$F_{06}$] Drive opened with correct credentials; filesystem corrupted with
+    \texttt{fsck}-detectable errors before re-encryption.
+  \item[$F_{07}$] Encryption process interrupted mid-operation via \texttt{SIGKILL} at
+    50\% completion.
+\end{description}
+
+\subsection{Pass Criteria}
+
+A test case passes if and only if all five of the following conditions hold:
+
+\begin{enumerate}[label=\textbf{P\arabic*.}]
+  \item The Detection Engine correctly identifies the encryption scheme and assigns the
+    correct failure mode classification ($F_{01}$--$F_{07}$) with confidence $\geq 0.80$.
+  \item The SCPR engine's returned reason set $R^*$ contains the ground-truth failure mode
+    and no spurious reasons.
+  \item The \texttt{BackupManager} produces a verified sector-level backup before any write
+    operation proceeds.
+  \item The appropriate plugin executes the correct recovery action for the identified
+    failure mode.
+  \item The \texttt{AuditLog} contains a complete, hash-chained record of all session
+    actions.
+\end{enumerate}
+
+\begin{tcolorbox}[enhanced, colback=lightamber!60, colframe=amber, arc=4pt,
+  fonttitle=\bfseries, title={Viability: Moderate}]
+The VM-based portion ($\approx$80\% of the matrix) can be built and run within existing
+infrastructure using QEMU and loopback devices. The physical drive testing requires
+acquisition of 5--8 test drives. The Opal SED subset requires specific self-encrypting
+drive hardware and \texttt{sedutil-cli} access; this subset may be deferred to a later
+phase if hardware is unavailable. Estimated effort: 4--6 weeks (VM corpus) + 2--4 weeks
+(physical subset).
+\end{tcolorbox}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.88\textwidth]{fig08_test_matrix}
+  \caption{Functional test coverage matrix: encryption scheme $\times$ failure mode.
+    Green cells indicate VM-based testing via loopback images or QEMU; amber cells
+    indicate physical drive testing required; grey cells are not applicable to the
+    scheme. $F_{04}$ (physical degradation) requires real drives across all schemes.
+    $F_{03}$ (corrupted PBA) is not applicable to LUKS1, LUKS2, or VeraCrypt, and
+    requires physical Opal~SED hardware. All remaining cells are VM-testable within
+    existing infrastructure.}
+  \label{fig:test-matrix}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Stream 3: Comparative Analysis --- LP-Optimal vs.\ Greedy Baseline}
+\label{sec:empirical:stream3}
+
+\subsection{Objective and Research Question}
+
+The central theoretical claim of CipherRescue's diagnostic engine is that LP-optimal
+diagnosis is \emph{necessary}---not merely preferable---for reliable FDE failure
+attribution. This stream provides the empirical evidence for that claim by systematically
+comparing LP-optimal SCPR solutions against the greedy $H_n$-approximation baseline across
+FDE-domain instances.
+
+\textbf{Research question:} On what fraction of FDE-domain instances does greedy set cover
+produce a diagnosis that differs from the LP-optimal solution, and what is the operational
+consequence of that difference?
+
+\subsection{Greedy Baseline Specification}
+
+The greedy baseline implements the standard weighted set cover approximation: at each step,
+select the reason $r \in \calF$ that maximises the ratio of newly covered signals to cost
+$c(r)$. This procedure achieves an approximation ratio of $H_n = 1 + \ln n$ where
+$n = |\calU|$. For the FDE domain with $|\calU|$ typically in the range $10$--$50$, the
+theoretical worst-case ratio is approximately $3.3$--$4.9$.
+
+The baseline is implemented as a standalone module within the SCPR engine codebase,
+enabling direct head-to-head comparison on identical problem instances with identical input
+data.
+
+\subsection{Comparison Metrics}
+
+\begin{table}[htbp]
+\centering
+\caption{Greedy vs.\ LP-optimal comparison metrics}
+\label{tab:compmetrics}
+\begin{tabular}{@{}p{3.8cm}p{4.8cm}p{3.4cm}@{}}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Relevance} \\
+\midrule
+Solution cost ratio           & $c(R^*_{\mathrm{greedy}}) / c(R^*_{\mathrm{LP}})$ & Direct measure of sub-optimality \\
+Reason set cardinality        & $|R^*_{\mathrm{greedy}}|$ vs.\ $|R^*_{\mathrm{LP}}|$ & Over-diagnosis rate \\
+False positive rate           & Fraction with reasons absent from LP-optimal solution & Spurious attributions misdirect recovery \\
+False negative rate           & Fraction missing reasons present in LP-optimal solution & Missed failures yield incomplete recovery \\
+Ambiguity resolution          & Cases where $\delta = 0$ but greedy returns non-minimum covering & Demonstrates value of optimality certificate \\
+Runtime                       & Wall-clock: LP solve vs.\ greedy pass & Practical cost of optimality \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Instance Stratification}
+
+The comparison is conducted across four stratified instance categories to reveal the
+conditions under which greedy underperforms most severely:
+
+\begin{description}[leftmargin=2em]
+  \item[Low density (sparse $E$)] Few signals per reason---greedy tends to select
+    near-optimally.
+  \item[High density (dense $E$)] Many overlapping signals---greedy over-selects; LP
+    exploits overlap structure.
+  \item[Adversarial cost structure] Costs calibrated to maximise greedy's approximation
+    ratio.
+  \item[Concurrent multi-failure] Two or three ground-truth failure modes active
+    simultaneously---tests whether greedy correctly identifies all modes or conflates them.
+\end{description}
+
+\begin{tcolorbox}[enhanced, colback=lightgreen!40, colframe=forestgreen, arc=4pt,
+  fonttitle=\bfseries, title={Viability: High}]
+This is the most immediately executable validation stream. Both the LP solver
+(\texttt{scipy.optimize.linprog}) and the greedy baseline can be implemented within the
+existing codebase. The FDE-domain synthetic corpus from Stream~1 serves as the instance
+set---no additional data generation is required. This comparison directly supports the P1
+theory paper submission. Estimated effort: 3--4 weeks including analysis and figure
+production.
+\end{tcolorbox}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig09_greedy_vs_lp}
+  \caption{Indicative empirical comparison of LP-optimal SCPR against the greedy
+    $H_n$-approximation baseline.
+    \textbf{(a)}~Cost ratio $c(R^*_{\mathrm{greedy}}) / c(R^*_{\mathrm{LP}})$: the
+    greedy ratio reaches $\times$1.78 on adversarial-cost instances.
+    \textbf{(b)}~Diagnostic error rates: false positive and false negative rates under
+    greedy diagnosis, rising sharply on adversarial and multi-failure instances.
+    \textbf{(c)}~Wall-clock runtime vs.\ $|\Sigma_{\mathrm{obs}}|$: LP-optimal stays
+    within the 200\,ms target for $|\Sigma_{\mathrm{obs}}| \leq 87$; the greedy
+    baseline is faster but incurs the diagnostic errors shown in panel~(b). All values
+    are indicative and will be replaced with empirical results in the P1 submission.}
+  \label{fig:greedy-vs-lp}
+\end{figure}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Comparative Positioning Against Existing Tools}
+\label{sec:empirical:toolcomp}
+
+\subsection{Why Direct Tool Comparison Is Not the Right Frame}
+
+A na\"ive application of ``empirical comparative analysis'' might suggest running
+CipherRescue and existing tools (e.g., Elcomsoft Forensic Disk Decryptor, BitLocker
+Recovery Console) on the same device corpus and measuring accuracy. This framing is
+methodologically incorrect for three reasons.
+
+\begin{enumerate}
+  \item \textbf{Different problem.} Commercial forensic suites operate on a threat model
+    that assumes the investigator does not hold the encryption key. CipherRescue assumes
+    authorised administrator recovery with credentials. These are incommensurable problems.
+  \item \textbf{Uncontrolled environment.} Existing tools are closed-source,
+    Windows-hosted applications. A direct comparison cannot control for environment, input,
+    and evaluation criteria in a scientifically rigorous way.
+  \item \textbf{No common output space.} No existing tool produces a diagnostic report
+    analogous to CipherRescue's SCPR-based output. Comparison on diagnostic quality is
+    therefore undefined in the traditional sense.
+\end{enumerate}
+
+\subsection{The Correct Comparative Frame}
+
+The appropriate empirical comparison is between CipherRescue's diagnostic output and an
+\emph{expert human baseline}: the diagnosis that a knowledgeable FDE recovery practitioner
+would produce from the same observable device state. This comparison:
+
+\begin{itemize}
+  \item is scientifically rigorous---both parties observe identical inputs, and outputs can
+    be compared against pre-specified ground truth;
+  \item is practically meaningful---it answers the question that matters operationally:
+    does CipherRescue diagnose correctly, and does it agree with expert judgment?
+  \item is executable---a structured expert review protocol can be designed around the same
+    synthetic corpus used in Stream~1.
+\end{itemize}
+
+\subsection{Expert Baseline Protocol}
+
+A subset of synthetic instances ($n \geq 30$, stratified across failure modes) are
+presented to one or more domain experts as anonymised device state descriptions, without
+CipherRescue output. Experts record their diagnosis (failure mode attribution) and
+confidence level. CipherRescue's LP-optimal output is then compared against expert
+diagnosis on the same instances. Inter-rater agreement (Cohen's $\kappa$) is computed
+where multiple experts participate.
+
+\begin{tcolorbox}[enhanced, colback=lightamber!60, colframe=amber, arc=4pt,
+  fonttitle=\bfseries, title={Ethics Review Note}]
+This protocol may constitute human participants research under Coventry's ethics
+framework. Ethics review requirements should be clarified with the Research Graduate
+School before protocol commencement. Expert recruitment will draw initially from the
+author's professional network in enterprise security. Where multiple experts are
+unavailable, a single expert review provides a directional rather than a statistically
+robust comparison and should be presented as such.
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{SCPR Problem Instance Generator}
+\label{sec:empirical:generator}
+
+\subsection{Purpose}
+
+The SCPR instance generator provides a publicly accessible interface for generating
+on-demand SCPR problem instances parameterised by universe size $|\calU|$, reason set
+size $|\calR|$, entailment density, and cost distribution. This supports reproducible
+research, enables the wider combinatorial optimisation community to experiment with SCPR
+without constructing instances manually, and provides a benchmark generation capability
+analogous to those offered by established libraries in related domains.
+
+\subsection{Technical Specification}
+
+\begin{table}[htbp]
+\centering
+\caption{SCPR instance generator specification}
+\label{tab:genspec}
+\begin{tabular}{@{}lp{9cm}@{}}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+Interface &
+  Web form (HTML/JS front end) + Python back end via REST API \\
+Input parameters &
+  $|\calU| \in [2, 500]$,\; $|\calR| \in [2, 1000]$,\;
+  entailment density $\in (0, 1]$,\; cost distribution:
+  $\{$uniform, Gaussian, adversarial, custom$\}$ \\
+Output formats &
+  Plain-text (\texttt{.txt}) --- canonical, language-agnostic, archival;
+  Python pickle (\texttt{.pkl}) --- convenience export;
+  JSON --- programmatic consumption \\
+Extraction code &
+  Bundled extraction scripts for both \texttt{.txt} and \texttt{.pkl} with
+  documented schema \\
+Generation time &
+  Target $< 2$\,s for $|\calU| \leq 200$,\; $|\calR| \leq 500$ \\
+Rate limiting &
+  Public: 100 req/hr per IP;\; authenticated contributors: 1000 req/hr \\
+Hosting &
+  GitHub Pages (static front end) + lightweight Python hosting
+  (e.g., PythonAnywhere or Fly.io free tier) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Archival Format Policy}
+
+\begin{tcolorbox}[enhanced, colback=lightblue!40, colframe=royalblue, arc=4pt,
+  fonttitle=\bfseries, title={Format Principle}]
+Plain-text (\texttt{.txt}) is the canonical archival format for the library.
+\texttt{.pkl} files are Python-specific and not portable across language versions or
+interpreters---they are offered as a convenience export but are \emph{not} the primary
+format. Any library aiming for the longevity of OR-Library or SMT-LIB must anchor its
+canonical representation in a format that is human-readable, language-agnostic, and
+version-stable.
+\end{tcolorbox}
+
+The plain-text schema is as follows. Line~1 contains $|\calU|$ and $|\calR|$ separated by
+a space. Each subsequent line encodes one reason as a space-separated list of entailed
+element indices (1-based) followed by the reason cost. This schema is stable, fully
+documented in the library \texttt{README}, and parseable from any programming environment.
+
+\begin{tcolorbox}[enhanced, colback=lightgreen!40, colframe=forestgreen, arc=4pt,
+  fonttitle=\bfseries, title={Viability: High}]
+The data generation framework already exists \citep{babatunde2025thesis}. The web
+interface is a straightforward engineering task requiring approximately 2--3 weeks.
+GitHub Pages plus a minimal Python back end is feasible at zero cost in the initial phase.
+The generator should be launched ahead of the library's full domain-categorised content
+to demonstrate immediate utility.
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Public SCPR Problem Instance Library}
+\label{sec:empirical:library}
+
+\subsection{Vision and Precedents}
+
+The SCPR library is a domain-indexed repository of problem instances, conceived in the
+tradition of Beasley's OR-Library for operations research \citep{beasley1990} and SMT-LIB
+for satisfiability \citep{barrett2010smtlib}. The goal is to establish a community
+standard for benchmarking SCPR algorithms, enable reproducible research across all three
+existing domain applications of SCPR, and provide curated instance sets for the domains in
+which CipherRescue operates.
+
+\subsection{Domain Categories at Launch}
+
+\begin{table}[htbp]
+\centering
+\caption{SCPR library domain categories at launch}
+\label{tab:libdomains}
+\begin{tabular}{@{}p{4.2cm}p{3.4cm}p{2.2cm}l@{}}
+\toprule
+\textbf{Domain} & \textbf{Instance Source} & \textbf{Count} & \textbf{Availability} \\
+\midrule
+CDCAC / Quantifier-Free Arithmetic &
+  Existing benchmark \citep{babatunde2025thesis} & Existing set & Immediate \\
+FEA Mesh Optimisation &
+  Existing benchmark \citep{babatunde2025thesis} & Existing set & Immediate \\
+FDE Failure Diagnosis &
+  Synthetic corpus (Section~\ref{sec:empirical:stream1}) &
+  $\geq 140$ & Phase~2 \\
+Synthetic Stress Test &
+  Generator (Section~\ref{sec:empirical:generator}) &
+  On demand & At generator launch \\
+Community Contributed &
+  Submitted via review pipeline &
+  0 at launch & Post-publication \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Library Architecture}
+
+\begin{itemize}
+  \item Static file hosting on GitHub Pages for instance downloads---no server-side
+    dependency for retrieval.
+  \item Structured directory layout:
+    \texttt{/library/\{domain\}/\{subcategory\}/\{instance\_id\}.txt} with associated
+    \texttt{README.md} per domain.
+  \item Each domain \texttt{README} documents the problem source, entailment knowledge
+    base construction, cost assignment rationale, and known optimal solutions where
+    available.
+  \item A master index file (\texttt{index.json}) enumerates all instances with metadata:
+    domain, $|\calU|$, $|\calR|$, density, source, known optimal, date added.
+\end{itemize}
+
+\subsection{Contributor Submission Pipeline}
+
+The contributor pipeline is intentionally staged. At launch, the library is curated---all
+instances are either generated by the author or derived from the existing benchmark suite.
+Contributor submission infrastructure is introduced in Phase~5 (post-publication), once
+the community has had opportunity to engage with the library and the review capacity exists
+to handle submissions responsibly.
+
+When the pipeline opens, submission will require: (1) a pull request containing instance
+files in canonical plain-text format; (2) a domain \texttt{README} documenting the problem
+source, entailment construction rationale, and known optimal solutions; (3) technical
+review by the maintainer verifying format compliance, instance validity, and documentation
+completeness; and (4) a minimum 14-day review period before merge.
+
+\begin{tcolorbox}[enhanced, colback=lightblue!40, colframe=royalblue, arc=4pt,
+  fonttitle=\bfseries, title={Staged Launch Rationale}]
+A contributor portal built before the community exists wastes engineering effort and
+creates governance obligations the project cannot sustainably fulfil. The OR-Library and
+SMT-LIB both developed contributor infrastructure \emph{after} the community formed around
+initial curated content. The same sequencing applies here: publish P1 and P2 first; build
+the contributor pipeline once there is demonstrated demand.
+\end{tcolorbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Validation Framework Summary}
+\label{sec:empirical:summary}
+
+Table~\ref{tab:validationsummary} consolidates the viability assessment across all
+components of the empirical validation and community infrastructure programme.
+
+\begin{table}[htbp]
+\centering
+\caption{Empirical validation and infrastructure: consolidated viability summary}
+\label{tab:validationsummary}
+\begin{tabular}{@{}p{4.6cm}lp{3.8cm}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Viability} & \textbf{Key Constraint} & \textbf{Phase} & \textbf{Supports} \\
+\midrule
+Code validation --- synthetic profiles   & High     & None significant             & Immediate     & P1 \\
+Greedy vs.\ LP-optimal comparison        & High     & None significant             & Immediate     & P1 \\
+Functional testing --- VM corpus         & High     & Effort $\sim$4--6 wks        & Phase~2       & P2 \\
+Functional testing --- physical drives   & Moderate & Hardware acquisition         & Phase~2       & P2 \\
+Expert baseline comparison               & Moderate & Expert recruitment; ethics   & Phase~2--3    & P2 \\
+Human factors usability study            & Low--Mod & Ethics approval; recruitment & Phase~3       & P2 \\
+SCPR instance generator                  & High     & Effort $\sim$2--3 wks        & Near-term     & Library; community \\
+Library --- curated launch               & High     & Content at launch            & Near-term     & P1 reproducibility \\
+Library --- contributor pipeline         & Low (now)& Community size; governance   & Post-pub      & Long-term community \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{fig10_validation_gantt}
+  \caption{Validation framework phase and viability chart. Each row corresponds to
+    one component from Table~\ref{tab:validationsummary}. The viability badge
+    (green = High, amber = Moderate, red = Low) reflects feasibility under current
+    resource constraints. Gantt bars span the covered phases; dots mark individual
+    phase milestones. \emph{Validation streams} (rows 1--6) are separated from
+    \emph{Infrastructure} (rows 7--9) by a horizontal rule. The contributor pipeline
+    is placed at Post-publication owing to community maturity requirements.}
+  \label{fig:validation-gantt}
+\end{figure}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\part{References}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\bibliographystyle{plainnat}
+\bibliography{cipherrescue}
+
+\end{document}
