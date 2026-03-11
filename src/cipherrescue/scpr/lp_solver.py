@@ -58,6 +58,7 @@ logger = logging.getLogger(__name__)
 # Result types
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class LPResult:
     """
@@ -71,6 +72,7 @@ class LPResult:
         reason_order: R list (columns of primal[:len(R)]).
         signal_order: U list (rows of dual).
     """
+
     primal: npt.NDArray[np.float64]
     dual: npt.NDArray[np.float64]
     objective: float
@@ -105,6 +107,7 @@ class ILPResult:
         objective_value:  Σ c(r) for r ∈ S*.
         is_optimal:       True iff solver status is 0.
     """
+
     selected_reasons: list[Reason]
     objective_value: float
     is_optimal: bool
@@ -113,6 +116,7 @@ class ILPResult:
 # ─────────────────────────────────────────────────────────────────────────────
 # Shared matrix builder
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _build_system(A: ThesisSCPR) -> tuple[list, list, list]:
     """
@@ -181,6 +185,7 @@ def _build_system(A: ThesisSCPR) -> tuple[list, list, list]:
 # Public solvers
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def solve_ilp(A: ThesisSCPR) -> ILPResult:
     """
     Exact ILP solve via HiGHS branch-and-bound (integrality=1).
@@ -206,8 +211,12 @@ def solve_ilp(A: ThesisSCPR) -> ILPResult:
     integrality = [1] * (nR + nT)
 
     result = scipy.optimize.linprog(
-        c, A_ub=Aub, b_ub=Bub, bounds=bounds,
-        method="highs", integrality=integrality,
+        c,
+        A_ub=Aub,
+        b_ub=Bub,
+        bounds=bounds,
+        method="highs",
+        integrality=integrality,
         options={"disp": False},
     )
 
@@ -221,7 +230,10 @@ def solve_ilp(A: ThesisSCPR) -> ILPResult:
     obj = round(result.fun) if result.fun is not None else 0.0
 
     logger.info(
-        "ILP: OPT=%d, selected=%d/%d reasons", obj, len(selected), nR,
+        "ILP: OPT=%d, selected=%d/%d reasons",
+        obj,
+        len(selected),
+        nR,
     )
     return ILPResult(
         selected_reasons=selected,
@@ -248,8 +260,12 @@ def solve_lp(instance: SCPRInstance) -> LPResult:
     if not instance.universe:
         empty: npt.NDArray[np.float64] = np.array([], dtype=np.float64)
         return LPResult(
-            primal=empty, dual=empty, objective=0.0, is_optimal=True,
-            reason_order=[], signal_order=[],
+            primal=empty,
+            dual=empty,
+            objective=0.0,
+            is_optimal=True,
+            reason_order=[],
+            signal_order=[],
         )
 
     A = from_instance(instance)
@@ -265,8 +281,12 @@ def _solve_lp_on_thesis(A: ThesisSCPR) -> LPResult:
     if not A.U:
         empty: npt.NDArray[np.float64] = np.array([], dtype=np.float64)
         return LPResult(
-            primal=empty, dual=empty, objective=0.0, is_optimal=True,
-            reason_order=list(A.R), signal_order=list(A.U),
+            primal=empty,
+            dual=empty,
+            objective=0.0,
+            is_optimal=True,
+            reason_order=list(A.R),
+            signal_order=list(A.U),
         )
 
     c, Aub, Bub = _build_system(A)
@@ -275,8 +295,12 @@ def _solve_lp_on_thesis(A: ThesisSCPR) -> LPResult:
     bounds = [(0.0, 1.0)] * (nR + nT)
 
     result = scipy.optimize.linprog(
-        c, A_ub=Aub, b_ub=Bub, bounds=bounds,
-        method="highs", options={"disp": False},
+        c,
+        A_ub=Aub,
+        b_ub=Bub,
+        bounds=bounds,
+        method="highs",
+        options={"disp": False},
     )
 
     if result.status not in (0, 1):
@@ -295,7 +319,10 @@ def _solve_lp_on_thesis(A: ThesisSCPR) -> LPResult:
 
     logger.info(
         "LP relaxation: OPT=%.6f, |R|=%d, |U|=%d, |T|=%d",
-        result.fun, len(A.R), len(A.U), len(A.T),
+        result.fun,
+        len(A.R),
+        len(A.U),
+        len(A.T),
     )
 
     return LPResult(

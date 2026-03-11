@@ -26,8 +26,9 @@ logger = logging.getLogger(__name__)
 # ── Canonical signal names ─────────────────────────────────────────────────
 # These must match the covering pair definitions in the SCPR instance builder.
 
-SIGNAL_SMART_REALLOCATED     = Signal("smart_reallocated_sectors",
-                                      "SMART attr 5: reallocated sector count elevated")
+SIGNAL_SMART_REALLOCATED = Signal(
+    "smart_reallocated_sectors", "SMART attr 5: reallocated sector count elevated"
+)
 SIGNAL_SMART_PENDING = Signal(
     "smart_pending_sectors",
     "SMART attr 197: current pending sector count > 0",
@@ -53,13 +54,15 @@ SIGNAL_FS_CHECK_FAIL = Signal(
     "Filesystem check reports errors on decrypted volume",
 )
 
+
 @dataclass
 class DetectionResult:
     """Signals extracted from a device by the Detection Engine."""
+
     device_path: str
     signals: frozenset[Signal] = field(default_factory=frozenset)
     raw_smart: dict = field(default_factory=dict)
-    scheme_hint: str = ""          # 'luks2' | 'bitlocker' | 'veracrypt' | 'opal' | ''
+    scheme_hint: str = ""  # 'luks2' | 'bitlocker' | 'veracrypt' | 'opal' | ''
     errors: list[str] = field(default_factory=list)
 
 
@@ -119,9 +122,7 @@ class DetectionEngine:
 
     # ── Extractors (stubs) ───────────────────────────────────────────────
 
-    def _extract_smart(
-        self, device_path: str
-    ) -> tuple[set[Signal], dict]:
+    def _extract_smart(self, device_path: str) -> tuple[set[Signal], dict]:
         """
         Parse SMART attributes via smartctl --json.
 
@@ -132,9 +133,7 @@ class DetectionEngine:
         # Placeholder: return empty
         return set(), {}
 
-    def _check_header(
-        self, device_path: str
-    ) -> tuple[set[Signal], str]:
+    def _check_header(self, device_path: str) -> tuple[set[Signal], str]:
         """
         Check the first 4096 bytes for known FDE scheme magic bytes.
 
@@ -145,9 +144,7 @@ class DetectionEngine:
         # TODO: open device (read-only), read header bytes, classify
         return set(), ""
 
-    def _check_entropy(
-        self, device_path: str
-    ) -> set[Signal]:
+    def _check_entropy(self, device_path: str) -> set[Signal]:
         """
         Sample 16 random 512-byte sectors and compute byte entropy.
 

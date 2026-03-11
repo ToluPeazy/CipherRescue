@@ -61,8 +61,9 @@ class TestSCPRInstance:
         assert minimal_instance.r == 2
         assert minimal_instance.m == 3
 
-    def test_default_unit_costs(self, minimal_instance, reason_disk_failure,
-                                reason_header_overwrite):
+    def test_default_unit_costs(
+        self, minimal_instance, reason_disk_failure, reason_header_overwrite
+    ):
         assert minimal_instance.costs[reason_disk_failure] == 1.0
         assert minimal_instance.costs[reason_header_overwrite] == 1.0
 
@@ -78,7 +79,10 @@ class TestSCPRInstance:
     def test_custom_costs(self, sig_smart_realloc, reason_disk_failure):
         u = frozenset([sig_smart_realloc])
         r = frozenset([reason_disk_failure])
-        pairs = [CoveringPair(frozenset([sig_smart_realloc]),
-                              frozenset([reason_disk_failure]))]
+        pairs = [
+            CoveringPair(
+                frozenset([sig_smart_realloc]), frozenset([reason_disk_failure])
+            )
+        ]
         inst = SCPRInstance(u, r, pairs, costs={reason_disk_failure: 5.0})
         assert inst.costs[reason_disk_failure] == 5.0

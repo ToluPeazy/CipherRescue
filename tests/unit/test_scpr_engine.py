@@ -16,9 +16,9 @@ def solver() -> SCPRSolver:
 
 
 class TestSCPRSolverCorrectness:
-
-    def test_single_essential_solved(self, solver, single_essential_instance,
-                                     reason_partial_encryption):
+    def test_single_essential_solved(
+        self, solver, single_essential_instance, reason_partial_encryption
+    ):
         sol = solver.solve(single_essential_instance)
         assert reason_partial_encryption in sol.optimal_reasons
 
@@ -38,14 +38,17 @@ class TestSCPRSolverCorrectness:
         sol = solver.solve(minimal_instance)
         assert sol.objective_value >= sol.lp_lower_bound - 1e-9
 
-    def test_infeasible_reports_uncovered(self, solver, infeasible_instance,
-                                          sig_keyslot_invalid):
+    def test_infeasible_reports_uncovered(
+        self, solver, infeasible_instance, sig_keyslot_invalid
+    ):
         sol = solver.solve(infeasible_instance)
         assert sig_keyslot_invalid in sol.uncovered_signals
 
     def test_empty_instance(self, solver):
         inst = SCPRInstance(
-            universe=frozenset(), reasons=frozenset(), covering_pairs=[],
+            universe=frozenset(),
+            reasons=frozenset(),
+            covering_pairs=[],
         )
         sol = solver.solve(inst)
         assert sol.objective_value == 0.0
@@ -87,7 +90,6 @@ class TestSCPRSolverMultiReason:
 
 
 class TestSCPRSolverScaling:
-
     def test_ten_signals_ten_reasons(self, solver):
         """Diagonal instance — all 10 reasons are essential."""
         signals = [Signal(f"s{i}") for i in range(10)]

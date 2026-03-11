@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 # Universe elements: anomaly signals observable on a device
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class Signal:
     """
@@ -32,6 +33,7 @@ class Signal:
     Signals are drawn from SMART attributes, entropy measurements, and
     header anomaly indicators (Layer 2 output).
     """
+
     name: str
     description: str = ""
 
@@ -43,6 +45,7 @@ class Signal:
 # Reasons: failure mode hypotheses
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class Reason:
     """
@@ -52,6 +55,7 @@ class Reason:
     variable y*ⱼ associated with this reason at optimum serves as its
     evidence weight in the FailureReport.
     """
+
     name: str
     description: str = ""
     # Evidence weight assigned by LP dual variable at optimum (populated
@@ -65,6 +69,7 @@ class Reason:
 # ---------------------------------------------------------------------------
 # Covering pairs: (Aᵢ, Rᵢ) ∈ E
 # ---------------------------------------------------------------------------
+
 
 @dataclass(frozen=True)
 class CoveringPair:
@@ -82,6 +87,7 @@ class CoveringPair:
     In the FDE application (CipherRescue), Aᵢ is the subset of anomaly
     signals explained by failure modes Rᵢ.
     """
+
     covering_set: frozenset[Signal]
     reason_set: frozenset[Reason]
 
@@ -95,6 +101,7 @@ class CoveringPair:
 # SCPR Instance
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SCPRInstance:
     """
@@ -107,6 +114,7 @@ class SCPRInstance:
         costs:          Optional cost vector c(ρⱼ) for weighted SCPR.
                         Defaults to uniform unit cost if not provided.
     """
+
     universe: frozenset[Signal]
     reasons: frozenset[Reason]
     covering_pairs: list[CoveringPair]
@@ -150,6 +158,7 @@ class SCPRInstance:
 # SCPR Solution
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SCPRSolution:
     """
@@ -167,6 +176,7 @@ class SCPRSolution:
         reduced_instance:   The instance after Beasley reduction (may differ
                             from the original if reduction was applied).
     """
+
     instance: SCPRInstance
     optimal_reasons: frozenset[Reason]
     objective_value: float

@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 # Raw readers — direct ports from SCPR_File_Handler.py (Babatunde, 2025)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def SCPR_reader(file_name: str | Path) -> tuple[list, list, list]:
     """
     Read a numeric SCPR instance file.
@@ -97,6 +98,7 @@ def SCPR_reader_CDCAC(file_name: str | Path) -> tuple[list, list, list, list]:
 # ─────────────────────────────────────────────────────────────────────────────
 # Type conversion — wrap integer (U, R, E) in CipherRescue types
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def to_scpr_instance(
     U: list[int],
@@ -159,6 +161,7 @@ def load_benchmark_instance(
 # Pickle reader (thesis benchmark .pkl format)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def SCPR_reader_pkl(file_name) -> tuple:
     """
     Read a thesis benchmark .pkl file.
@@ -176,6 +179,7 @@ def SCPR_reader_pkl(file_name) -> tuple:
         (U, R, E) — integer lists.
     """
     import pickle
+
     with open(file_name, "rb") as f:
         data = pickle.load(f)
     if not (isinstance(data, (list, tuple)) and len(data) >= 3):

@@ -29,16 +29,16 @@ logger = logging.getLogger(__name__)
 
 
 class SessionState(Enum):
-    INIT      = auto()
+    INIT = auto()
     ENUMERATE = auto()
-    DETECT    = auto()
-    DIAGNOSE  = auto()
-    AUTH      = auto()
-    SELECT    = auto()
-    CONFIRM   = auto()
-    EXECUTE   = auto()
-    REPORT    = auto()
-    ABORTED   = auto()
+    DETECT = auto()
+    DIAGNOSE = auto()
+    AUTH = auto()
+    SELECT = auto()
+    CONFIRM = auto()
+    EXECUTE = auto()
+    REPORT = auto()
+    ABORTED = auto()
 
 
 class SessionContext:
@@ -67,8 +67,9 @@ class SessionContext:
         self.selected_action = None
 
     def transition(self, target: SessionState) -> None:
-        logger.info("Session %s: %s → %s",
-                    self.session_id, self.state.name, target.name)
+        logger.info(
+            "Session %s: %s → %s", self.session_id, self.state.name, target.name
+        )
         self.audit_log.log_state_transition(self.state.name, target.name)
         self.state = target
 
@@ -91,6 +92,5 @@ class Orchestrator:
 
     def abort(self, reason: str = "") -> None:
         if self.context:
-            logger.warning("Session %s aborted: %s",
-                           self.context.session_id, reason)
+            logger.warning("Session %s aborted: %s", self.context.session_id, reason)
             self.context.transition(SessionState.ABORTED)

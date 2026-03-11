@@ -41,6 +41,7 @@ class AuthToken:
     reads key material or modifies the device.  Zeroed immediately after
     use via ctypes.memset (see spec §7.2).
     """
+
     scheme: str
     device_path: str
     session_id: str
@@ -49,9 +50,10 @@ class AuthToken:
 @dataclass
 class Action:
     """A recoverable action offered by a plugin for operator selection."""
+
     name: str
     description: str
-    risk_level: int      # 1=read-only  2=non-destructive  3=destructive  4=irreversible
+    risk_level: int  # 1=read-only  2=non-destructive  3=destructive  4=irreversible
     requires_backup: bool = True
 
 
@@ -94,9 +96,7 @@ class SchemePlugin(abc.ABC):
         """
 
     @abc.abstractmethod
-    def available_actions(
-        self, device_path: str, token: AuthToken
-    ) -> list[Action]:
+    def available_actions(self, device_path: str, token: AuthToken) -> list[Action]:
         """
         Return the list of recovery actions available given the auth token.
 

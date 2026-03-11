@@ -22,13 +22,17 @@ import click
 
 @click.command()
 @click.option("--device", "-d", default="", help="Target block device path.")
-@click.option("--forensic", is_flag=True, default=False,
-              help="Start in forensic mode (law enforcement authority).")
-@click.option("--debug", is_flag=True, default=False,
-              help="Enable debug logging.")
+@click.option(
+    "--forensic",
+    is_flag=True,
+    default=False,
+    help="Start in forensic mode (law enforcement authority).",
+)
+@click.option("--debug", is_flag=True, default=False, help="Enable debug logging.")
 def main(device: str, forensic: bool, debug: bool) -> None:
     """CipherRescue — FDE recovery framework."""
     import logging
+
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:

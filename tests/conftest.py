@@ -15,17 +15,21 @@ from cipherrescue.scpr.types import (
 
 # ── Canonical test signals ─────────────────────────────────────────────────
 
+
 @pytest.fixture
 def sig_smart_realloc() -> Signal:
     return Signal("smart_reallocated_sectors")
+
 
 @pytest.fixture
 def sig_header_absent() -> Signal:
     return Signal("header_absent")
 
+
 @pytest.fixture
 def sig_entropy_low() -> Signal:
     return Signal("entropy_low")
+
 
 @pytest.fixture
 def sig_keyslot_invalid() -> Signal:
@@ -34,17 +38,21 @@ def sig_keyslot_invalid() -> Signal:
 
 # ── Canonical test reasons ─────────────────────────────────────────────────
 
+
 @pytest.fixture
 def reason_disk_failure() -> Reason:
     return Reason("disk_failure", "Physical disk sector failure")
+
 
 @pytest.fixture
 def reason_header_overwrite() -> Reason:
     return Reason("header_overwrite", "LUKS header overwritten by OS reinstall")
 
+
 @pytest.fixture
 def reason_wrong_device() -> Reason:
     return Reason("wrong_device", "Operator targeting wrong device")
+
 
 @pytest.fixture
 def reason_partial_encryption() -> Reason:
@@ -52,6 +60,7 @@ def reason_partial_encryption() -> Reason:
 
 
 # ── Minimal feasible SCPR instance ────────────────────────────────────────
+
 
 @pytest.fixture
 def minimal_instance(

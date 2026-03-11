@@ -17,7 +17,6 @@ def log() -> AuditLog:
 
 
 class TestAuditLog:
-
     def test_chain_valid_after_open(self, log):
         assert log.verify_chain() is True
 

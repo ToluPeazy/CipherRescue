@@ -37,7 +37,6 @@ S = [1, 2, 3]
 
 
 class TestSCPRReader:
-
     def test_reads_numeric_format(self, tmp_path):
         f = tmp_path / "instance.txt"
         f.write_text(NUMERIC_INSTANCE)
@@ -56,7 +55,6 @@ class TestSCPRReader:
 
 
 class TestSCPRReaderCDCAC:
-
     def test_reads_cdcac_format(self, tmp_path):
         f = tmp_path / "instance.txt"
         f.write_text(CDCAC_INSTANCE)
@@ -68,7 +66,6 @@ class TestSCPRReaderCDCAC:
 
 
 class TestToSCPRInstance:
-
     def test_converts_to_typed_instance(self):
         U = [1, 2]
         R = [1, 2]

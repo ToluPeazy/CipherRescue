@@ -61,14 +61,14 @@ class SCPRSolver:
         """
         logger.info(
             "SCPRSolver.solve: |U|=%d, |R|=%d, |E|=%d",
-            instance.n, instance.r, instance.m,
+            instance.n,
+            instance.r,
+            instance.m,
         )
 
         if not instance.is_feasible():
             uncovered = instance.universe - _covered_by_any(instance)
-            logger.warning(
-                "Instance has %d uncoverable signals", len(uncovered)
-            )
+            logger.warning("Instance has %d uncoverable signals", len(uncovered))
 
         # ── Phase 1: Beasley reduction ───────────────────────────────────────
         reduction = apply_structural_reduction(instance)
@@ -168,6 +168,7 @@ class SCPRSolver:
 # Module-level helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _lp_with_fallback(instance: SCPRInstance) -> LPResult:
     """Attempt LP relaxation; return zero-dual result on failure."""
     try:
@@ -177,6 +178,7 @@ def _lp_with_fallback(instance: SCPRInstance) -> LPResult:
         import numpy as np
 
         from .lp_solver import LPResult
+
         return LPResult(
             primal=np.array([]),
             dual=np.array([]),

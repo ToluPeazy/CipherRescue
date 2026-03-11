@@ -15,7 +15,6 @@ from cipherrescue.scpr.types import CoveringPair, Reason, SCPRInstance, Signal
 
 
 class TestLPRelaxation:
-
     def test_minimal_instance_feasible(self, minimal_instance):
         result = solve_lp(minimal_instance)
         assert result.is_optimal
@@ -38,8 +37,9 @@ class TestLPRelaxation:
         for val in lp.dual_weights().values():
             assert val >= -1e-9, f"Negative dual: {val}"
 
-    def test_dual_weights_dict_keys(self, minimal_instance,
-                                    sig_smart_realloc, sig_header_absent):
+    def test_dual_weights_dict_keys(
+        self, minimal_instance, sig_smart_realloc, sig_header_absent
+    ):
         lp = solve_lp(minimal_instance)
         weights = lp.dual_weights()
         assert sig_smart_realloc in weights
@@ -47,7 +47,9 @@ class TestLPRelaxation:
 
     def test_empty_instance(self):
         inst = SCPRInstance(
-            universe=frozenset(), reasons=frozenset(), covering_pairs=[],
+            universe=frozenset(),
+            reasons=frozenset(),
+            covering_pairs=[],
         )
         result = solve_lp(inst)
         assert result.objective == 0.0
@@ -66,9 +68,9 @@ class TestLPRelaxation:
 
 
 class TestILP:
-
-    def test_minimal_instance_solved(self, minimal_instance,
-                                     reason_disk_failure, reason_header_overwrite):
+    def test_minimal_instance_solved(
+        self, minimal_instance, reason_disk_failure, reason_header_overwrite
+    ):
         A = from_instance(minimal_instance)
         result = solve_ilp(A)
         assert result.is_optimal
@@ -77,7 +79,9 @@ class TestILP:
 
     def test_empty_instance(self):
         inst = SCPRInstance(
-            universe=frozenset(), reasons=frozenset(), covering_pairs=[],
+            universe=frozenset(),
+            reasons=frozenset(),
+            covering_pairs=[],
         )
         A = from_instance(inst)
         result = solve_ilp(A)

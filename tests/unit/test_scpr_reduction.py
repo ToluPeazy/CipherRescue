@@ -26,7 +26,7 @@ class TestBeasleyReductionRaw:
         r1 = Reason("r1")
         U = [sig1]
         R = [r1]
-        E = [[[ sig1 ], [ r1 ]]]
+        E = [[[sig1], [r1]]]
         U_red, R_red, E_red, C = beasley_reduction(U, R, E)
         assert r1 in C
         assert len(U_red) == 0  # fully resolved
@@ -51,15 +51,16 @@ class TestBeasleyReductionRaw:
         s1, s2 = Signal("s1"), Signal("s2")
         r1, r2 = Reason("r1"), Reason("r2")
         # e1 covers {s1} requiring {r1, r2} — dominated by e2 covering
-        #{s1, s2} requiring {r1}
+        # {s1, s2} requiring {r1}
         E = [
             [[s1], [r1, r2]],
             [[s1, s2], [r1]],
         ]
         _, _, E_red, C = beasley_reduction([s1, s2], [r1, r2], E)
         # e1 should have been removed as dominated
-        assert [s1, s2] == sorted([s.name for e in E_red for s in e[0]], key=str) or \
-               len(E_red) <= len(E)  # at minimum, reduction happened or stayed same
+        assert [s1, s2] == sorted(
+            [s.name for e in E_red for s in e[0]], key=str
+        ) or len(E_red) <= len(E)  # at minimum, reduction happened or stayed same
 
     def test_c_is_disjoint_from_remaining_e(self):
         """Reasons in C should generally not appear as the only reason
@@ -75,8 +76,9 @@ class TestBeasleyReductionRaw:
 class TestApplyStructuralReduction:
     """Tests on the typed apply_structural_reduction wrapper."""
 
-    def test_essential_reason_fixed_in(self, single_essential_instance,
-                                       reason_partial_encryption):
+    def test_essential_reason_fixed_in(
+        self, single_essential_instance, reason_partial_encryption
+    ):
         result = apply_structural_reduction(single_essential_instance)
         assert reason_partial_encryption in result.fixed_in
 

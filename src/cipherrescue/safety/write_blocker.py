@@ -36,6 +36,7 @@ class BackupToken:
         timestamp:      Unix timestamp at which the backup was verified.
         session_id:     Unique identifier for the recovery session.
     """
+
     device_path: str
     backup_sha256: str
     timestamp: float
@@ -82,7 +83,8 @@ class WriteBlocker:
         # TODO: verify token signature against session key
         logger.info(
             "WriteBlocker: write permitted to %s (backup=%s)",
-            device_path, token.backup_sha256[:16] + "...",
+            device_path,
+            token.backup_sha256[:16] + "...",
         )
 
     def is_write_permitted(self, device_path: str) -> bool:

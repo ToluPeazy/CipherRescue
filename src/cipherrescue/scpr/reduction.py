@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Result type (unchanged public API)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class ReductionResult:
     """
@@ -56,6 +57,7 @@ class ReductionResult:
         reduction_rate:     Fraction of original reasons eliminated.
         is_fully_resolved:  True iff the reduced instance has an empty universe.
     """
+
     reduced_instance: SCPRInstance
     fixed_in: frozenset[Reason]
     fixed_out: frozenset[Reason]
@@ -66,6 +68,7 @@ class ReductionResult:
 # ─────────────────────────────────────────────────────────────────────────────
 # List utilities — direct ports from thesis
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _list_remove(L: list, i: object) -> list:
     """Remove element i from list L (copy). Adapted from thesis list_remove."""
@@ -102,9 +105,8 @@ def _is_subset(L1: list, L2: list) -> bool:
 # Core reduction — direct port from thesis
 # ─────────────────────────────────────────────────────────────────────────────
 
-def beasley_reduction(
-    U: list, R: list, E: list
-) -> tuple[list, list, list, list]:
+
+def beasley_reduction(U: list, R: list, E: list) -> tuple[list, list, list, list]:
     """
     Apply Beasley's reduction to the SCPR instance (U, R, E).
 
@@ -160,6 +162,7 @@ def beasley_reduction(
 # Public API — wraps beasley_reduction with typed I/O
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def apply_structural_reduction(instance: SCPRInstance) -> ReductionResult:
     """
     Apply Beasley's reduction to a typed SCPRInstance.
@@ -196,6 +199,7 @@ def apply_structural_reduction(instance: SCPRInstance) -> ReductionResult:
         )
     else:
         from .types import CoveringPair
+
         reduced_pairs = [
             CoveringPair(
                 covering_set=frozenset(e[0]),
@@ -203,9 +207,7 @@ def apply_structural_reduction(instance: SCPRInstance) -> ReductionResult:
             )
             for e in E_red
         ]
-        reduced_reasons = frozenset(
-            r for e in E_red for r in e[1]
-        ) - fixed_in
+        reduced_reasons = frozenset(r for e in E_red for r in e[1]) - fixed_in
 
         reduced = SCPRInstance(
             universe=frozenset(U_red),
@@ -221,7 +223,9 @@ def apply_structural_reduction(instance: SCPRInstance) -> ReductionResult:
     logger.info(
         "Beasley reduction: %d reasons fixed in, %d remaining universe elements. "
         "Fully resolved: %s",
-        len(fixed_in), len(U_red), is_fully_resolved,
+        len(fixed_in),
+        len(U_red),
+        is_fully_resolved,
     )
 
     return ReductionResult(
