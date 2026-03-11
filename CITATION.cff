@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: "If you use CipherRescue in your research, please cite it as below."
+authors:
+  - family-names: Babatunde
+    given-names: Abiola Tolulope
+    orcid: https://orcid.org/0000-0001-7186-1092
+    affiliation: Coventry University
+title: "CipherRescue: SCPR-Based Cryptographic Storage Failure Diagnosis System"
+version: 1.0.0
+date-released: 2026-03-11
+url: "https://github.com/ToluPeazy/cipherrescue"
+repository-code: "https://github.com/ToluPeazy/cipherrescue"
+license: Apache-2.0
+keywords:
+  - cryptography
+  - storage systems
+  - failure diagnosis
+  - SCPR
+  - set covering problem
+  - optimization
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Babatunde
+      given-names: Abiola Tolulope
+      orcid: https://orcid.org/0000-0001-7186-1092
+  title: "CipherRescue: SCPR-Based Cryptographic Storage Failure Diagnosis System"
+  year: 2026
+  url: "https://github.com/ToluPeazy/cipherrescue"
+references:
+  - type: article
+    authors:
+      - family-names: Babatunde
+        given-names: Abiola Tolulope
+      - family-names: England
+        given-names: Matthew
+      - family-names: Sadeghimanesh
+        given-names: AmirHosein
+    title: "Optimising Cylindrical Algebraic Coverings for use in Satisfiability Modulo
+      Theories by Solving a Set Covering Problem with Reasons"
+    journal: "Discrete Optimization"
+    year: 2025
+    note: "Submitted"
+    url: "https://arxiv.org/abs/2601.14424"
+  - type: data
+    authors:
+      - family-names: Babatunde
+        given-names: Abiola Tolulope
+      - family-names: England
+        given-names: Matthew
+      - family-names: Sadeghimanesh
+        given-names: AmirHosein
+    title: "SCPR Instance Dataset from SMT-LIB Benchmarks"
+    year: 2025
+    repository: "Zenodo"
+    doi: "10.5281/zenodo.15326494"
