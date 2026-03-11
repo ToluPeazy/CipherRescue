@@ -34,8 +34,8 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from ._thesis_instance import ThesisSCPR, from_instance
-from .types import Reason, SCPRInstance, Signal
+from ._thesis_instance import from_instance
+from .types import Reason, SCPRInstance
 
 logger = logging.getLogger(__name__)
 

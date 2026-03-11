@@ -8,16 +8,14 @@ import pytest
 
 from cipherrescue.scpr.types import (
     CoveringPair,
-    Reason,
     SCPRInstance,
-    SCPRSolution,
     Signal,
 )
 
 
 class TestSignal:
     def test_frozen(self, sig_smart_realloc):
-        with pytest.raises(Exception):
+        with pytest.raises((AttributeError, TypeError)):
             sig_smart_realloc.name = "changed"  # type: ignore[misc]
 
     def test_equality(self):
@@ -34,7 +32,7 @@ class TestReason:
         assert reason_disk_failure.evidence_weight is None
 
     def test_frozen(self, reason_disk_failure):
-        with pytest.raises(Exception):
+        with pytest.raises((AttributeError, TypeError)):
             reason_disk_failure.name = "changed"  # type: ignore[misc]
 
 

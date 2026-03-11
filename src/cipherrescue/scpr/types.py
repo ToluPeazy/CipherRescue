@@ -19,8 +19,6 @@ References:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import FrozenSet
-
 
 # ---------------------------------------------------------------------------
 # Universe elements: anomaly signals observable on a device
@@ -84,8 +82,8 @@ class CoveringPair:
     In the FDE application (CipherRescue), Aᵢ is the subset of anomaly
     signals explained by failure modes Rᵢ.
     """
-    covering_set: FrozenSet[Signal]
-    reason_set: FrozenSet[Reason]
+    covering_set: frozenset[Signal]
+    reason_set: frozenset[Reason]
 
     def __repr__(self) -> str:
         a = {s.name for s in self.covering_set}
@@ -109,8 +107,8 @@ class SCPRInstance:
         costs:          Optional cost vector c(ρⱼ) for weighted SCPR.
                         Defaults to uniform unit cost if not provided.
     """
-    universe: FrozenSet[Signal]
-    reasons: FrozenSet[Reason]
+    universe: frozenset[Signal]
+    reasons: frozenset[Reason]
     covering_pairs: list[CoveringPair]
     costs: dict[Reason, float] = field(default_factory=dict)
 
@@ -170,11 +168,11 @@ class SCPRSolution:
                             from the original if reduction was applied).
     """
     instance: SCPRInstance
-    optimal_reasons: FrozenSet[Reason]
+    optimal_reasons: frozenset[Reason]
     objective_value: float
     lp_lower_bound: float
     dual_weights: dict[Reason, float]
-    uncovered_signals: FrozenSet[Signal]
+    uncovered_signals: frozenset[Signal]
     solver_phase: str
     reduced_instance: SCPRInstance | None = None
 

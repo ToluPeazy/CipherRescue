@@ -48,7 +48,9 @@ class ThesisSCPR:
         self.R = R
         self.E = E
         self.T: list[list[Reason]] = non_single_reason(E)
-        self.costs: dict[Reason, float] = costs if costs is not None else {r: 1.0 for r in R}
+        self.costs: dict[Reason, float] = (
+        costs if costs is not None else dict.fromkeys(R, 1.0)
+        )
 
 
 def from_instance(instance: SCPRInstance) -> ThesisSCPR:

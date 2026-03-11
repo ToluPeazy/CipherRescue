@@ -4,18 +4,11 @@ Unit tests — Layer 5: file handler (SCPR_File_Handler port).
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
-
-import pytest
-
 from cipherrescue.scpr.file_handler import (
     SCPR_reader,
     SCPR_reader_CDCAC,
     to_scpr_instance,
 )
-from cipherrescue.scpr.types import Signal, Reason
-
 
 NUMERIC_INSTANCE = """\
 3

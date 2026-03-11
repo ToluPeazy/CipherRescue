@@ -10,8 +10,6 @@ Adapted to the thesis-based implementation in reduction.py.
 
 from __future__ import annotations
 
-import pytest
-
 from cipherrescue.scpr.reduction import apply_structural_reduction, beasley_reduction
 from cipherrescue.scpr.types import CoveringPair, Reason, SCPRInstance, Signal
 
@@ -52,7 +50,8 @@ class TestBeasleyReductionRaw:
         """
         s1, s2 = Signal("s1"), Signal("s2")
         r1, r2 = Reason("r1"), Reason("r2")
-        # e1 covers {s1} requiring {r1, r2} — dominated by e2 covering {s1, s2} requiring {r1}
+        # e1 covers {s1} requiring {r1, r2} — dominated by e2 covering
+        #{s1, s2} requiring {r1}
         E = [
             [[s1], [r1, r2]],
             [[s1, s2], [r1]],
@@ -63,7 +62,8 @@ class TestBeasleyReductionRaw:
                len(E_red) <= len(E)  # at minimum, reduction happened or stayed same
 
     def test_c_is_disjoint_from_remaining_e(self):
-        """Reasons in C should generally not appear as the only reason in remaining pairs."""
+        """Reasons in C should generally not appear as the only reason
+        in remaining pairs."""
         s1, s2 = Signal("s1"), Signal("s2")
         r1, r2 = Reason("r1"), Reason("r2")
         # s1 has only one pair — r1 forced. s2 has two pairs.
@@ -114,7 +114,7 @@ class TestApplyStructuralReduction:
         assert isinstance(result.fixed_in, frozenset)
 
     def test_column_reduction_removes_dominated_pair(self):
-        """
+        r"""
         Column reduction: e2 ([s1],[r_a,r_b]) is dominated by e1 ([s1],[r_a])
         because A2 ⊆ A1 (both ={s1}) and R1\C=[r_a] ⊆ R2=[r_a,r_b].
         After column reduction, only e1 remains.  The engine then selects r_a.

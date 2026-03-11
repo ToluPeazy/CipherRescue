@@ -19,8 +19,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from .._base import Action, AuthToken, PluginError, SchemePlugin
 from ...safety.write_blocker import BackupToken
+from .._base import Action, AuthToken, PluginError, SchemePlugin
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +40,28 @@ class LUKS2Plugin(SchemePlugin):
         self, device_path: str, token: AuthToken
     ) -> list[Action]:
         return [
-            Action("luks2_header_info",    "Dump LUKS2 header metadata",           risk_level=1, requires_backup=False),
-            Action("luks2_backup_header",  "Write header backup to recovery media", risk_level=2),
-            Action("luks2_restore_header", "Restore header from backup",            risk_level=3),
-            Action("luks2_repair_header",  "Run cryptsetup repair",                 risk_level=3),
-        ]
+                Action(
+                    "luks2_header_info",
+                    "Dump LUKS2 header metadata",
+                    risk_level=1,
+                    requires_backup=False,
+                ),
+                Action(
+                    "luks2_backup_header",
+                    "Write header backup to recovery media",
+                    risk_level=2,
+                ),
+                Action(
+                    "luks2_restore_header",
+                    "Restore header from backup",
+                    risk_level=3,
+                ),
+                Action(
+                    "luks2_repair_header",
+                    "Run cryptsetup repair",
+                    risk_level=3,
+                ),
+            ]
 
     def execute_action(
         self,
@@ -55,4 +72,6 @@ class LUKS2Plugin(SchemePlugin):
     ) -> dict[str, Any]:
         if action.requires_backup:
             self._wb.write_gate(device_path, backup_token)
-        raise PluginError(f"LUKS2Plugin.execute_action({action.name!r}): not yet implemented")
+        raise PluginError(
+        f"LUKS2Plugin.execute_action({action.name!r}): not yet implemented"
+)

@@ -49,7 +49,7 @@ def SCPR_reader(file_name: str | Path) -> tuple[list, list, list]:
 
     Direct port from SCPR_File_Handler.py (Babatunde, 2025).
     """
-    with open(file_name, "r") as f:
+    with open(file_name) as f:
         lines = f.read().split("\n")
 
     E_len = int(lines[2])
@@ -64,8 +64,8 @@ def SCPR_reader(file_name: str | Path) -> tuple[list, list, list]:
         E.append([uni_part, reas_part])
         i += 4
 
-    U = list(sorted(set(x for entry in E for x in entry[0])))
-    R = list(sorted(set(x for entry in E for x in entry[1])))
+    U = sorted({x for entry in E for x in entry[0]})
+    R = sorted({x for entry in E for x in entry[1]})
     return U, R, E
 
 
@@ -76,7 +76,7 @@ def SCPR_reader_CDCAC(file_name: str | Path) -> tuple[list, list, list, list]:
     Direct port from SCPR_File_Handler.py (Babatunde, 2025).
     """
     data: dict = {}
-    with open(file_name, "r") as f:
+    with open(file_name) as f:
         for line in f:
             line = line.strip()
             if not line or "=" not in line:
@@ -87,9 +87,9 @@ def SCPR_reader_CDCAC(file_name: str | Path) -> tuple[list, list, list, list]:
             except Exception as exc:
                 logger.warning("Could not parse key %r: %s", key.strip(), exc)
 
-    U = sorted(list(data.get("U", set())))
-    R = sorted(list(data.get("R", set())))
-    E = [[sorted(list(p)) for p in pair] for pair in data.get("E", [])]
+    U = sorted(data.get("U", set()))
+    R = sorted(data.get("R", set()))
+    E = [[sorted(p) for p in pair] for pair in data.get("E", [])]
     S = data.get("S", [])
     return U, R, E, S
 

@@ -92,7 +92,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S", "N"]
+"tests/**"                                  = ["S", "N", "B017"]
+"src/cipherrescue/scpr/**"                  = ["N802", "N803", "N806", "S301"]
+"src/cipherrescue/scpr/reduction.py"        = ["N802", "N803", "N806"]
+"src/cipherrescue/scpr/lp_solver.py"        = ["N802", "N803", "N806"]
+"src/cipherrescue/scpr/_thesis_instance.py" = ["N803", "N806"]
+"src/cipherrescue/scpr/engine.py"           = ["N806"]
 
 # ── Mypy ───────────────────────────────────────────────────────────────────────
 [tool.mypy]

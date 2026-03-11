@@ -22,10 +22,10 @@ from __future__ import annotations
 
 import logging
 
-from ._thesis_instance import ThesisSCPR, from_instance
-from .lp_solver import ILPResult, LPResult, _solve_lp_on_thesis, solve_ilp, solve_lp
-from .reduction import ReductionResult, apply_structural_reduction
-from .types import CoveringPair, Reason, SCPRInstance, SCPRSolution, Signal
+from ._thesis_instance import from_instance
+from .lp_solver import ILPResult, LPResult, solve_ilp, solve_lp
+from .reduction import apply_structural_reduction
+from .types import Reason, SCPRInstance, SCPRSolution, Signal
 
 logger = logging.getLogger(__name__)
 
@@ -174,8 +174,9 @@ def _lp_with_fallback(instance: SCPRInstance) -> LPResult:
         return solve_lp(instance)
     except (ValueError, Exception) as exc:  # noqa: BLE001
         logger.warning("LP relaxation failed (%s) — using zero duals", exc)
-        from .lp_solver import LPResult
         import numpy as np
+
+        from .lp_solver import LPResult
         return LPResult(
             primal=np.array([]),
             dual=np.array([]),

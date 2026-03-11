@@ -16,11 +16,8 @@ Status: STUB — implementation pending cybersecurity expert review.
 
 from __future__ import annotations
 
-import ctypes
 import logging
-import os
-from dataclasses import dataclass, field
-from pathlib import Path
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 

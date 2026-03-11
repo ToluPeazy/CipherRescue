@@ -23,11 +23,11 @@ import hashlib
 import json
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class Authority(str, Enum):
+class Authority(StrEnum):
     DEVICE_OWNER = "device_owner"
     AUTHORISED_REPRESENTATIVE = "authorised_representative"
     LAW_ENFORCEMENT = "law_enforcement"

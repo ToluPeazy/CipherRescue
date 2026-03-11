@@ -9,8 +9,6 @@ Tests verify correctness of:
 
 from __future__ import annotations
 
-import pytest
-
 from cipherrescue.scpr._thesis_instance import from_instance
 from cipherrescue.scpr.lp_solver import solve_ilp, solve_lp
 from cipherrescue.scpr.types import CoveringPair, Reason, SCPRInstance, Signal

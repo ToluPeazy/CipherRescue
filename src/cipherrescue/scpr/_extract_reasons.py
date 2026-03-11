@@ -16,8 +16,6 @@ Example:
 
 from __future__ import annotations
 
-from typing import Any
-
 
 def non_single_reason(combined_set: list[list]) -> list[list]:
     """

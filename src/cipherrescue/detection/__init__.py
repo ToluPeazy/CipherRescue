@@ -15,11 +15,8 @@ Status: STUB — signal extractors pending implementation.
 
 from __future__ import annotations
 
-import json
 import logging
-import subprocess
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from ..scpr.types import Signal
 
@@ -31,25 +28,30 @@ logger = logging.getLogger(__name__)
 
 SIGNAL_SMART_REALLOCATED     = Signal("smart_reallocated_sectors",
                                       "SMART attr 5: reallocated sector count elevated")
-SIGNAL_SMART_PENDING         = Signal("smart_pending_sectors",
-                                      "SMART attr 197: current pending sector count > 0")
-SIGNAL_SMART_UNCORRECTABLE   = Signal("smart_uncorrectable",
-                                      "SMART attr 198: uncorrectable sector count > 0")
-SIGNAL_SMART_REPORTED_UNCORR = Signal("smart_reported_uncorrectable",
-                                      "SMART attr 187: reported uncorrectable errors > 0")
-SIGNAL_ENTROPY_LOW           = Signal("entropy_low",
-                                      "Sector entropy below encryption floor (~7.9 bits/byte)")
-SIGNAL_HEADER_ABSENT         = Signal("header_absent",
-                                      "Expected scheme header magic bytes not found")
-SIGNAL_HEADER_CORRUPT        = Signal("header_corrupt",
-                                      "Header magic found but structure invalid or truncated")
-SIGNAL_KEYSLOT_INVALID       = Signal("keyslot_invalid",
-                                      "LUKS2 keyslot JSON metadata malformed")
-SIGNAL_BACKUP_HEADER_MISMATCH = Signal("backup_header_mismatch",
-                                       "LUKS2 primary and backup headers differ")
-SIGNAL_FS_CHECK_FAIL         = Signal("fs_check_fail",
-                                      "Filesystem check reports errors on decrypted volume")
-
+SIGNAL_SMART_PENDING = Signal(
+    "smart_pending_sectors",
+    "SMART attr 197: current pending sector count > 0",
+)
+SIGNAL_SMART_UNCORRECTABLE = Signal(
+    "smart_uncorrectable",
+    "SMART attr 198: uncorrectable sector count > 0",
+)
+SIGNAL_SMART_REPORTED_UNCORR = Signal(
+    "smart_reported_uncorrectable",
+    "SMART attr 187: reported uncorrectable errors > 0",
+)
+SIGNAL_ENTROPY_LOW = Signal(
+    "entropy_low",
+    "Sector entropy below encryption floor (~7.9 bits/byte)",
+)
+SIGNAL_HEADER_CORRUPT = Signal(
+    "header_corrupt",
+    "Header magic found but structure invalid or truncated",
+)
+SIGNAL_FS_CHECK_FAIL = Signal(
+    "fs_check_fail",
+    "Filesystem check reports errors on decrypted volume",
+)
 
 @dataclass
 class DetectionResult:

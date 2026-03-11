@@ -13,7 +13,6 @@ from cipherrescue.scpr.types import (
     Signal,
 )
 
-
 # ── Canonical test signals ─────────────────────────────────────────────────
 
 @pytest.fixture
