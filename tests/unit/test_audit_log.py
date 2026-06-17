@@ -121,3 +121,27 @@ class TestAuditLogHMAC:
         assert len(rejected) == 1
         assert rejected[0]["payload"]["to"] == "EXECUTE"
         assert log.verify_chain() is True
+
+    def test_mac_only_tampering_invalidates_chain(self):
+        """
+        Changing entry.mac on an otherwise valid chain must fail verify_chain().
+        This isolates the MAC check from the hash-chain check.
+        """
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
+        log.log_state_transition("INIT", "ENUMERATE")
+        entry = log._entries[1]
+        # Flip the last hex character — entry_hash and chain linkage untouched.
+        original_last = entry.mac[-1]
+        entry.mac = entry.mac[:-1] + ("0" if original_last != "0" else "1")
+        assert log.verify_chain() is False
+
+    def test_default_session_key_backward_compat(self):
+        """
+        AuditLog(session_key=b'') must still produce MACs and verify correctly
+        (guards the backward-compatibility contract for callers that omit the key).
+        """
+        log = AuditLog("s1", Authority.DEVICE_OWNER)  # session_key defaults to b""
+        log.log_state_transition("INIT", "ENUMERATE")
+        data = json.loads(log.export_json())
+        assert all("mac" in e and len(e["mac"]) == 64 for e in data)
+        assert log.verify_chain() is True

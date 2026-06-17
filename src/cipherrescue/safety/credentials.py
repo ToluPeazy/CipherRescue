@@ -73,7 +73,9 @@ class SecureBuffer:
 
     @property
     def value(self) -> bytes:
-        """Return the current buffer contents as bytes."""
+        """Return the current buffer contents, or b'' if the buffer is zeroed."""
+        if self.is_zeroed:
+            return b""
         return bytes(self._buf)
 
     def zero(self) -> None:

@@ -10,13 +10,11 @@ Verifies that:
 
 from __future__ import annotations
 
-import time
-
 import pytest
 
 from cipherrescue.safety.audit_log import Authority
 from cipherrescue.safety.backup_manager import BackupManager
-from cipherrescue.safety.write_blocker import BackupToken, WriteBlocker, _compute_token_hmac
+from cipherrescue.safety.write_blocker import BackupToken, WriteBlocker
 
 SESSION_KEY = b"test-session-key-32-bytes-padded"
 SESSION_ID = "test-session-001"
@@ -39,27 +37,25 @@ class TestWriteBlockerForgedToken:
     """A token constructed directly (bypassing BackupManager) must be rejected."""
 
     def test_forged_token_rejected_no_registration(self, blocker: WriteBlocker) -> None:
-        ts = time.time()
-        mac = _compute_token_hmac(SESSION_KEY, SESSION_ID, DEVICE_A, SHA256, ts)
-        forged = BackupToken(
+        # Token with a valid HMAC but never registered via BackupManager.
+        forged = BackupToken.create_signed(
+            session_key=SESSION_KEY,
+            session_id=SESSION_ID,
             device_path=DEVICE_A,
             backup_sha256=SHA256,
-            timestamp=ts,
-            session_id=SESSION_ID,
-            hmac=mac,
         )
         # Structurally valid HMAC but never registered — must be rejected.
         with pytest.raises(PermissionError, match="No registered backup token"):
             blocker.write_gate(DEVICE_A, forged)
 
     def test_forged_token_wrong_hmac_also_rejected(self, blocker: WriteBlocker) -> None:
-        ts = time.time()
+        # Token with a garbage HMAC — never registered, bad signature.
         forged = BackupToken(
             device_path=DEVICE_A,
             backup_sha256=SHA256,
-            timestamp=ts,
+            timestamp=0.0,
             session_id=SESSION_ID,
-            hmac="0" * 64,  # obviously wrong HMAC
+            hmac="0" * 64,
         )
         with pytest.raises(PermissionError):
             blocker.write_gate(DEVICE_A, forged)
@@ -91,7 +87,7 @@ class TestWriteBlockerWrongSessionKey:
 
         other_blocker = WriteBlocker(session_key=b"different-key-32-bytes-paddingg!")
         # Manually register the token in the other blocker to isolate key check
-        other_blocker._register_token(token)
+        other_blocker.register_token(token)
 
         with pytest.raises(PermissionError, match="HMAC verification failed"):
             other_blocker.write_gate(DEVICE_A, token)

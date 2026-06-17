@@ -20,10 +20,10 @@ class TestSecureBuffer:
         buf.__exit__(None, None, None)
         assert buf.is_zeroed is True
 
-    def test_zero_clears_buffer(self) -> None:
+    def test_zero_returns_empty_after_zeroed(self) -> None:
         buf = SecureBuffer(b"password123")
         buf.zero()
-        assert buf.value == b"\x00" * len(b"password123")
+        assert buf.value == b""  # is_zeroed=True → value returns b''
 
     def test_double_zero_safe(self) -> None:
         buf = SecureBuffer(b"data")

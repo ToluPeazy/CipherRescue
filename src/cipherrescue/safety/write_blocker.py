@@ -17,6 +17,7 @@ from __future__ import annotations
 import hashlib
 import hmac as _hmac
 import logging
+import time
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -45,17 +46,60 @@ class BackupToken:
     session_id: str
     hmac: str
 
+    def _message(self) -> bytes:
+        """Single source of truth for the HMAC message field ordering."""
+        return (
+            f"{self.session_id}|{self.device_path}|"
+            f"{self.backup_sha256}|{self.timestamp}"
+        ).encode()
 
-def _compute_token_hmac(
-    session_key: bytes,
-    session_id: str,
-    device_path: str,
-    backup_sha256: str,
-    timestamp: float,
-) -> str:
-    """Compute HMAC_K(session_id ∥ device_path ∥ backup_sha256 ∥ timestamp)."""
-    message = f"{session_id}|{device_path}|{backup_sha256}|{timestamp}".encode()
-    return _hmac.new(session_key, message, hashlib.sha256).hexdigest()
+    def verify(self, session_key: bytes) -> None:
+        """
+        Raise PermissionError if the token HMAC is invalid under session_key.
+
+        Used by write_gate() to reject tokens signed under a different key
+        or tokens whose fields have been tampered with after issuance.
+        """
+        expected = _hmac.new(session_key, self._message(), hashlib.sha256).hexdigest()
+        if not _hmac.compare_digest(expected, self.hmac):
+            raise PermissionError(
+                f"BackupToken HMAC verification failed for {self.device_path!r}. "
+                "Token may have been forged or issued under a different session key."
+            )
+
+    @classmethod
+    def create_signed(
+        cls,
+        *,
+        session_key: bytes,
+        session_id: str,
+        device_path: str,
+        backup_sha256: str,
+        timestamp: float | None = None,
+    ) -> BackupToken:
+        """
+        Construct and HMAC-sign a new BackupToken.
+
+        Called exclusively by BackupManager.create_backup() so that token
+        construction and signing are in one place.
+        """
+        ts = timestamp if timestamp is not None else time.time()
+        # Build a temporary token to compute _message() consistently.
+        proto = cls(
+            device_path=device_path,
+            backup_sha256=backup_sha256,
+            timestamp=ts,
+            session_id=session_id,
+            hmac="",
+        )
+        mac = _hmac.new(session_key, proto._message(), hashlib.sha256).hexdigest()
+        return cls(
+            device_path=device_path,
+            backup_sha256=backup_sha256,
+            timestamp=ts,
+            session_id=session_id,
+            hmac=mac,
+        )
 
 
 class WriteBlocker:
@@ -79,9 +123,23 @@ class WriteBlocker:
         self._session_key = session_key
         self._issued_tokens: dict[str, BackupToken] = {}
 
-    def _register_token(self, token: BackupToken) -> None:
-        """Register a token. Called exclusively by BackupManager."""
+    def register_token(self, token: BackupToken) -> None:
+        """Register a BackupToken issued by BackupManager."""
         self._issued_tokens[token.device_path] = token
+
+    def _check_device_path(self, device_path: str, token: BackupToken) -> None:
+        if token.device_path != device_path:
+            raise ValueError(
+                f"Token device {token.device_path!r} does not match "
+                f"target device {device_path!r}."
+            )
+
+    def _check_registered(self, device_path: str) -> None:
+        if self._issued_tokens.get(device_path) is None:
+            raise PermissionError(
+                f"No registered backup token for {device_path!r}. "
+                "BackupManager.create_backup() must be called first."
+            )
 
     def write_gate(self, device_path: str, token: BackupToken) -> None:
         """
@@ -102,31 +160,9 @@ class WriteBlocker:
             ValueError:      If the token device path does not match.
             PermissionError: If no registered token exists or HMAC is invalid.
         """
-        if token.device_path != device_path:
-            raise ValueError(
-                f"Token device {token.device_path!r} does not match "
-                f"target device {device_path!r}."
-            )
-
-        registered = self._issued_tokens.get(device_path)
-        if registered is None:
-            raise PermissionError(
-                f"No registered backup token for {device_path!r}. "
-                "BackupManager.create_backup() must be called first."
-            )
-
-        expected_hmac = _compute_token_hmac(
-            self._session_key,
-            token.session_id,
-            token.device_path,
-            token.backup_sha256,
-            token.timestamp,
-        )
-        if not _hmac.compare_digest(expected_hmac, token.hmac):
-            raise PermissionError(
-                f"BackupToken HMAC verification failed for {device_path!r}. "
-                "Token may have been forged or issued under a different session key."
-            )
+        self._check_device_path(device_path, token)
+        self._check_registered(device_path)
+        token.verify(self._session_key)
 
         logger.info(
             "WriteBlocker: write permitted to %s (backup=%s)",

@@ -16,10 +16,9 @@ from __future__ import annotations
 import hashlib
 import logging
 import subprocess
-import time
 from pathlib import Path
 
-from .write_blocker import BackupToken, WriteBlocker, _compute_token_hmac
+from .write_blocker import BackupToken, WriteBlocker
 
 logger = logging.getLogger(__name__)
 
@@ -65,22 +64,13 @@ class BackupManager:
         Returns:
             Registered BackupToken.
         """
-        timestamp = time.time()
-        mac = _compute_token_hmac(
-            self._session_key,
-            self._session_id,
-            device_path,
-            backup_sha256,
-            timestamp,
-        )
-        token = BackupToken(
+        token = BackupToken.create_signed(
+            session_key=self._session_key,
+            session_id=self._session_id,
             device_path=device_path,
             backup_sha256=backup_sha256,
-            timestamp=timestamp,
-            session_id=self._session_id,
-            hmac=mac,
         )
-        self._wb._register_token(token)
+        self._wb.register_token(token)
         logger.info(
             "BackupManager: token issued for %s (sha256=%s...)",
             device_path,
