@@ -18,6 +18,7 @@ from types import TracebackType
 logger = logging.getLogger(__name__)
 
 _MLOCK_AVAILABLE = False
+_libc: ctypes.CDLL | None = None
 
 if sys.platform.startswith("linux"):
     try:
@@ -29,16 +30,16 @@ if sys.platform.startswith("linux"):
 
 def _mlock(addr: int, length: int) -> bool:
     """Call mlock(2). Returns True on success."""
-    if not _MLOCK_AVAILABLE:
+    if not _MLOCK_AVAILABLE or _libc is None:
         return False
-    ret = _libc.mlock(ctypes.c_void_p(addr), ctypes.c_size_t(length))  # type: ignore[union-attr]
+    ret: int = _libc.mlock(ctypes.c_void_p(addr), ctypes.c_size_t(length))
     return ret == 0
 
 
 def _munlock(addr: int, length: int) -> None:
     """Call munlock(2). Silent on failure."""
-    if _MLOCK_AVAILABLE:
-        _libc.munlock(ctypes.c_void_p(addr), ctypes.c_size_t(length))  # type: ignore[union-attr]
+    if _MLOCK_AVAILABLE and _libc is not None:
+        _libc.munlock(ctypes.c_void_p(addr), ctypes.c_size_t(length))
 
 
 class SecureBuffer:

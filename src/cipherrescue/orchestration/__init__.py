@@ -55,14 +55,6 @@ VALID_TRANSITIONS: dict[SessionState, set[SessionState]] = {
     SessionState.EXECUTE: {SessionState.REPORT, SessionState.ABORTED},
     SessionState.REPORT: {SessionState.ABORTED},
     SessionState.ABORTED: set(),
-    SessionState.DETECT:    {SessionState.DIAGNOSE, SessionState.ABORTED},
-    SessionState.DIAGNOSE:  {SessionState.AUTH, SessionState.ABORTED},
-    SessionState.AUTH: {SessionState.SELECT, SessionState.DETECT, SessionState.ABORTED},
-    SessionState.SELECT:    {SessionState.CONFIRM, SessionState.ABORTED},
-    SessionState.CONFIRM:   {SessionState.EXECUTE, SessionState.ABORTED},
-    SessionState.EXECUTE:   {SessionState.REPORT, SessionState.ABORTED},
-    SessionState.REPORT:    {SessionState.ABORTED},
-    SessionState.ABORTED:   set(),
 }
 
 
@@ -165,7 +157,4 @@ class Orchestrator:
     def abort(self, reason: str = "") -> None:
         if self.context and self.context.state is not SessionState.ABORTED:
             logger.warning("Session %s aborted: %s", self.context.session_id, reason)
-            logger.warning(
-                "Session %s aborted: %s", self.context.session_id, reason
-            )
             self.context.transition(SessionState.ABORTED)
