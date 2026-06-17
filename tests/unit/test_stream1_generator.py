@@ -77,6 +77,9 @@ class TestReproducibility:
         c2 = generate_fde_corpus(n=150, seed=99)
         # At least some instances should differ
         diffs = sum(1 for a, b in zip(c1, c2, strict=True) if a.universe != b.universe)
+        diffs = sum(
+            1 for a, b in zip(c1, c2, strict=True) if a.universe != b.universe
+        )
         assert diffs > 0
 
 
