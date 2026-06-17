@@ -27,9 +27,7 @@ class TestCorpusSize:
 
 
 class TestCorpusDiversity:
-    def test_all_instances_are_scpr_instances(
-        self, corpus: list[SCPRInstance]
-    ) -> None:
+    def test_all_instances_are_scpr_instances(self, corpus: list[SCPRInstance]) -> None:
         for inst in corpus:
             assert isinstance(inst, SCPRInstance)
 
@@ -39,15 +37,11 @@ class TestCorpusDiversity:
         for inst in corpus:
             assert inst.n > 0, "Every instance must have at least one signal"
 
-    def test_instances_have_non_empty_reasons(
-        self, corpus: list[SCPRInstance]
-    ) -> None:
+    def test_instances_have_non_empty_reasons(self, corpus: list[SCPRInstance]) -> None:
         for inst in corpus:
             assert inst.r > 0, "Every instance must have at least one reason"
 
-    def test_instances_have_covering_pairs(
-        self, corpus: list[SCPRInstance]
-    ) -> None:
+    def test_instances_have_covering_pairs(self, corpus: list[SCPRInstance]) -> None:
         for inst in corpus:
             assert inst.m > 0, "Every instance must have at least one covering pair"
 
@@ -82,9 +76,7 @@ class TestReproducibility:
         c1 = generate_fde_corpus(n=150, seed=42)
         c2 = generate_fde_corpus(n=150, seed=99)
         # At least some instances should differ
-        diffs = sum(
-            1 for a, b in zip(c1, c2, strict=True) if a.universe != b.universe
-        )
+        diffs = sum(1 for a, b in zip(c1, c2, strict=True) if a.universe != b.universe)
         assert diffs > 0
 
 

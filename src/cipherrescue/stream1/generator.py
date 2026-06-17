@@ -83,9 +83,7 @@ S_ENTROPY_PARTIAL = Signal(
 S_FS_CHECK_FAIL = Signal(
     "fs_check_fail", "Filesystem check reports errors on decrypted volume"
 )
-S_MOUNT_FAIL = Signal(
-    "mount_fail", "Volume mounts but immediately reports I/O errors"
-)
+S_MOUNT_FAIL = Signal("mount_fail", "Volume mounts but immediately reports I/O errors")
 
 # I/O / hardware signals
 S_READ_ERROR = Signal("read_error", "I/O error on sector read")
@@ -120,9 +118,7 @@ R_DISK_FAILURE = Reason(
 R_HEADER_OVERWRITE = Reason(
     "header_overwrite", "FDE header overwritten (OS reinstall, dd, mkfs)"
 )
-R_WRONG_DEVICE = Reason(
-    "wrong_device", "Operator targeting wrong device path"
-)
+R_WRONG_DEVICE = Reason("wrong_device", "Operator targeting wrong device path")
 R_PARTIAL_ENCRYPTION = Reason(
     "partial_encryption", "Encryption process was interrupted mid-operation"
 )
@@ -147,9 +143,7 @@ R_WRONG_PASSPHRASE = Reason(
 R_FS_CORRUPTION = Reason(
     "filesystem_corruption", "Filesystem corruption on the decrypted volume"
 )
-R_SEEK_ERROR = Reason(
-    "seek_error_reason", "Read/write head positioning failure"
-)
+R_SEEK_ERROR = Reason("seek_error_reason", "Read/write head positioning failure")
 R_BAD_BLOCK = Reason(
     "bad_block", "Persistent bad blocks in or near the FDE header area"
 )
@@ -186,26 +180,27 @@ ALL_REASONS: list[Reason] = [
 
 REASON_SIGNALS: dict[Reason, list[Signal]] = {
     R_DISK_FAILURE: [S_SMART_REALLOC, S_SMART_PENDING, S_SMART_UNCORR, S_READ_ERROR],
-    R_HEADER_OVERWRITE:    [S_HEADER_ABSENT, S_HEADER_CORRUPT, S_ENTROPY_LOW],
-    R_WRONG_DEVICE:        [S_HEADER_ABSENT, S_WRONG_SCHEME, S_ENTROPY_LOW],
-    R_PARTIAL_ENCRYPTION:  [S_ENTROPY_PARTIAL, S_KEYSLOT_INVALID, S_HEADER_CORRUPT],
-    R_KEY_LOSS:            [S_KEYSLOT_INVALID],
-    R_BITROT:              [S_SMART_UNCORR, S_SMART_RPT_UNCORR, S_READ_ERROR],
-    R_FIRMWARE_BUG:        [S_SMART_REALLOC, S_SMART_UNCORR, S_WRITE_TIMEOUT],
-    R_POWER_FAILURE:       [S_HEADER_CORRUPT, S_KEYSLOT_INVALID, S_FS_CHECK_FAIL],
+    R_HEADER_OVERWRITE: [S_HEADER_ABSENT, S_HEADER_CORRUPT, S_ENTROPY_LOW],
+    R_WRONG_DEVICE: [S_HEADER_ABSENT, S_WRONG_SCHEME, S_ENTROPY_LOW],
+    R_PARTIAL_ENCRYPTION: [S_ENTROPY_PARTIAL, S_KEYSLOT_INVALID, S_HEADER_CORRUPT],
+    R_KEY_LOSS: [S_KEYSLOT_INVALID],
+    R_BITROT: [S_SMART_UNCORR, S_SMART_RPT_UNCORR, S_READ_ERROR],
+    R_FIRMWARE_BUG: [S_SMART_REALLOC, S_SMART_UNCORR, S_WRITE_TIMEOUT],
+    R_POWER_FAILURE: [S_HEADER_CORRUPT, S_KEYSLOT_INVALID, S_FS_CHECK_FAIL],
     R_METADATA_CORRUPTION: [S_KEYSLOT_INVALID, S_HEADER_CORRUPT],
-    R_WRONG_PASSPHRASE:    [S_KEYSLOT_INVALID],
-    R_FS_CORRUPTION:       [S_FS_CHECK_FAIL, S_MOUNT_FAIL],
-    R_SEEK_ERROR:          [S_READ_ERROR, S_SMART_PENDING, S_SEEK_ERROR],
-    R_BAD_BLOCK:           [S_SMART_REALLOC, S_READ_ERROR, S_HEADER_CORRUPT],
-    R_LUKS_VERSION:        [S_HEADER_CORRUPT, S_WRONG_SCHEME],
-    R_CIPHER_MISMATCH:     [S_ENTROPY_LOW, S_FS_CHECK_FAIL],
+    R_WRONG_PASSPHRASE: [S_KEYSLOT_INVALID],
+    R_FS_CORRUPTION: [S_FS_CHECK_FAIL, S_MOUNT_FAIL],
+    R_SEEK_ERROR: [S_READ_ERROR, S_SMART_PENDING, S_SEEK_ERROR],
+    R_BAD_BLOCK: [S_SMART_REALLOC, S_READ_ERROR, S_HEADER_CORRUPT],
+    R_LUKS_VERSION: [S_HEADER_CORRUPT, S_WRONG_SCHEME],
+    R_CIPHER_MISMATCH: [S_ENTROPY_LOW, S_FS_CHECK_FAIL],
 }
 
 
 # ---------------------------------------------------------------------------
 # Named scenario templates
 # ---------------------------------------------------------------------------
+
 
 class _Scenario(NamedTuple):
     name: str
@@ -321,6 +316,7 @@ _NAMED_SCENARIOS: list[_Scenario] = [
 # Generator
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FDEProfileGenerator:
     """
@@ -354,9 +350,7 @@ class FDEProfileGenerator:
         instances.extend(self._single_fault_instances())
         instances.extend(self._named_scenario_instances())
         instances.extend(self._two_reason_combinations())
-        instances.extend(
-            self._random_instances(rng, count=max(0, n - len(instances)))
-        )
+        instances.extend(self._random_instances(rng, count=max(0, n - len(instances))))
 
         return instances[:n] if len(instances) > n else instances
 
@@ -409,9 +403,7 @@ class FDEProfileGenerator:
                 result.append(inst)
         return result
 
-    def _random_instances(
-        self, rng: random.Random, count: int
-    ) -> list[SCPRInstance]:
+    def _random_instances(self, rng: random.Random, count: int) -> list[SCPRInstance]:
         """
         Randomly sampled instances with 2–4 reasons and varied cost structures.
         """
