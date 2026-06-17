@@ -4,8 +4,6 @@ Unit tests — Layer 3: SecureBuffer credential zeroing (Phase 1 P0-5).
 
 from __future__ import annotations
 
-import pytest
-
 from cipherrescue.safety.credentials import SecureBuffer
 
 

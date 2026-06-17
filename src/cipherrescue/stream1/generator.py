@@ -154,7 +154,8 @@ R_BAD_BLOCK = Reason(
     "bad_block", "Persistent bad blocks in or near the FDE header area"
 )
 R_LUKS_VERSION = Reason(
-    "luks_version_mismatch", "LUKS1 recovery tool applied to a LUKS2 device or vice versa"
+    "luks_version_mismatch",
+    "LUKS1 recovery tool applied to a LUKS2 device or vice versa",
 )
 R_CIPHER_MISMATCH = Reason(
     "cipher_mismatch", "Incorrect cipher or key size selected for recovery attempt"
@@ -184,7 +185,7 @@ ALL_REASONS: list[Reason] = [
 # ---------------------------------------------------------------------------
 
 REASON_SIGNALS: dict[Reason, list[Signal]] = {
-    R_DISK_FAILURE:        [S_SMART_REALLOC, S_SMART_PENDING, S_SMART_UNCORR, S_READ_ERROR],
+    R_DISK_FAILURE: [S_SMART_REALLOC, S_SMART_PENDING, S_SMART_UNCORR, S_READ_ERROR],
     R_HEADER_OVERWRITE:    [S_HEADER_ABSENT, S_HEADER_CORRUPT, S_ENTROPY_LOW],
     R_WRONG_DEVICE:        [S_HEADER_ABSENT, S_WRONG_SCHEME, S_ENTROPY_LOW],
     R_PARTIAL_ENCRYPTION:  [S_ENTROPY_PARTIAL, S_KEYSLOT_INVALID, S_HEADER_CORRUPT],
@@ -286,7 +287,7 @@ _NAMED_SCENARIOS: list[_Scenario] = [
     _Scenario(
         "catastrophic_multi_fault",
         [R_DISK_FAILURE, R_POWER_FAILURE, R_METADATA_CORRUPTION, R_BAD_BLOCK],
-        {r: 1.5 for r in [R_DISK_FAILURE, R_POWER_FAILURE]},
+        dict.fromkeys([R_DISK_FAILURE, R_POWER_FAILURE], 1.5),
     ),
     _Scenario(
         "filesystem_corruption_post_unlock",
@@ -305,7 +306,7 @@ _NAMED_SCENARIOS: list[_Scenario] = [
     ),
     _Scenario(
         "write_timeout_during_rekey",
-        [R_WRITE_TIMEOUT, R_FIRMWARE_BUG] if False else [R_FIRMWARE_BUG, R_POWER_FAILURE],
+        [R_FIRMWARE_BUG, R_POWER_FAILURE],
         {},
     ),
     _Scenario(
@@ -347,7 +348,7 @@ class FDEProfileGenerator:
         Returns:
             List of SCPRInstances.  All are feasible by construction.
         """
-        rng = random.Random(self.seed)
+        rng = random.Random(self.seed)  # noqa: S311
         instances: list[SCPRInstance] = []
 
         instances.extend(self._single_fault_instances())
@@ -377,7 +378,9 @@ class FDEProfileGenerator:
                 )
                 for s in signals
             ]
-            result.append(SCPRInstance(universe=universe, reasons=reasons, covering_pairs=pairs))
+            result.append(
+                SCPRInstance(universe=universe, reasons=reasons, covering_pairs=pairs)
+            )
         return result
 
     def _named_scenario_instances(self) -> list[SCPRInstance]:
@@ -447,7 +450,6 @@ class FDEProfileGenerator:
             return None
 
         universe = frozenset(all_signals)
-        reasons_set = frozenset(active_reasons)
         all_reasons_set = frozenset(ALL_REASONS)
 
         pairs: list[CoveringPair] = []
