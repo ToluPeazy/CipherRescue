@@ -1,18 +1,24 @@
 """
 Unit tests — Layer 3: AuditLog tamper-evidence (Theorem 3.3).
+
+Covers both hash-chain integrity (pre-existing) and HMAC keying (P0-3).
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pytest
 
 from cipherrescue.safety.audit_log import AuditLog, Authority
 
+SESSION_KEY = b"test-key-32-bytes-padded-xxxxxxx"
+
 
 @pytest.fixture
 def log() -> AuditLog:
+    # session_key defaults to b"" — existing tests pass without modification.
     return AuditLog("test-session-001", Authority.DEVICE_OWNER)
 
 
@@ -56,3 +62,62 @@ class TestAuditLog:
         data = json.loads(log.export_json())
         seqs = [e["sequence"] for e in data]
         assert seqs == list(range(len(seqs)))
+
+
+class TestAuditLogHMAC:
+    """P0-3: HMAC keying makes the chain non-regeneratable without session key K."""
+
+    def test_hmac_present_in_entries(self):
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
+        data = json.loads(log.export_json())
+        for entry in data:
+            assert "mac" in entry
+            assert len(entry["mac"]) == 64  # SHA-256 hex
+
+    def test_chain_valid_with_keyed_log(self):
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
+        log.log_state_transition("INIT", "ENUMERATE")
+        assert log.verify_chain() is True
+
+    def test_hmac_catches_hash_replay(self):
+        """
+        Attacker tampers payload AND recomputes entry_hash to match.
+        The MAC check must still catch this (hash chain alone cannot).
+        """
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
+        log.log_state_transition("INIT", "ENUMERATE")
+
+        entry = log._entries[1]
+        # Attacker corrupts payload and recomputes entry_hash to match.
+        entry.payload["from"] = "TAMPERED"
+        raw = json.dumps(
+            {
+                "seq": entry.sequence,
+                "ts": entry.timestamp,
+                "type": entry.event_type,
+                "payload": entry.payload,
+                "prev": entry.prev_hash,
+            },
+            sort_keys=True,
+        )
+        entry.entry_hash = hashlib.sha256(raw.encode()).hexdigest()
+        # Hash chain now looks consistent — but MAC fails because entry_hash changed.
+        assert log.verify_chain() is False
+
+    def test_wrong_session_key_fails_verify(self):
+        """A log verified under a different key must fail (chain not regeneratable)."""
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=b"key-A" + b"\x00" * 27)
+        log.log_state_transition("INIT", "ENUMERATE")
+
+        # Swap to a different key and re-verify
+        log._session_key = b"key-B" + b"\x00" * 27
+        assert log.verify_chain() is False
+
+    def test_rejected_transition_logged(self):
+        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
+        log.log_rejected_transition("INIT", "EXECUTE")
+        data = json.loads(log.export_json())
+        rejected = [e for e in data if e["event_type"] == "REJECTED_TRANSITION"]
+        assert len(rejected) == 1
+        assert rejected[0]["payload"]["to"] == "EXECUTE"
+        assert log.verify_chain() is True
