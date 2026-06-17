@@ -47,8 +47,9 @@ class LogEntry:
     entry_hash: str = field(init=False)
     mac: str = field(init=False, default="")
 
-    def __post_init__(self) -> None:
-        raw = json.dumps(
+    def _raw_json(self) -> str:
+        """Canonical JSON serialisation used for both hashing and verification."""
+        return json.dumps(
             {
                 "seq": self.sequence,
                 "ts": self.timestamp,
@@ -58,7 +59,13 @@ class LogEntry:
             },
             sort_keys=True,
         )
-        self.entry_hash = hashlib.sha256(raw.encode()).hexdigest()
+
+    def __post_init__(self) -> None:
+        self.entry_hash = self.recompute_hash()
+
+    def recompute_hash(self) -> str:
+        """Recompute SHA-256 over the canonical serialisation."""
+        return hashlib.sha256(self._raw_json().encode()).hexdigest()
 
     def set_mac(self, session_key: bytes) -> None:
         """Compute and set HMAC_K(entry_hash). Called by AuditLog._append()."""
@@ -66,14 +73,21 @@ class LogEntry:
             session_key, self.entry_hash.encode(), hashlib.sha256
         ).hexdigest()
 
+    def verify_mac(self, session_key: bytes) -> bool:
+        """Return True iff HMAC_K(entry_hash) matches the stored mac."""
+        expected = _hmac.new(
+            session_key, self.entry_hash.encode(), hashlib.sha256
+        ).hexdigest()
+        return _hmac.compare_digest(expected, self.mac)
+
 
 class AuditLog:
     """
     Tamper-evident, append-only audit log for a recovery session.
 
     Each entry is SHA-256 hash-chained and HMAC'd under the session key K
-    (Definition 3.1). verify_chain() checks both the hash linkage and the
-    per-entry MAC, so the chain is not regeneratable without K.
+    (Definition 3.1). verify_chain() checks hash linkage, payload integrity,
+    and MAC — the chain is not regeneratable without K.
     """
 
     GENESIS_HASH = "0" * 64
@@ -114,9 +128,7 @@ class AuditLog:
 
     def log_rejected_transition(self, from_state: str, to_state: str) -> None:
         """Log an attempted transition that was rejected by the state machine."""
-        self._append(
-            "REJECTED_TRANSITION", {"from": from_state, "to": to_state}
-        )
+        self._append("REJECTED_TRANSITION", {"from": from_state, "to": to_state})
 
     def log_diagnosis(self, solution_repr: str, uncovered_count: int) -> None:
         self._append(
@@ -141,35 +153,19 @@ class AuditLog:
         """
         Return True iff the entire chain is unmodified.
 
-        Checks per entry (in order):
-          1. Hash-chain linkage: entry.prev_hash == previous entry's entry_hash.
-          2. Payload integrity: recomputed entry_hash matches stored entry_hash.
-          3. MAC integrity: HMAC_K(entry_hash) matches stored entry.mac.
+        Delegates per-entry checks to LogEntry methods:
+          1. Hash-chain linkage (prev_hash == previous entry's entry_hash).
+          2. Payload integrity (recompute_hash() matches entry_hash).
+          3. MAC integrity (verify_mac() under session key K).
         """
         for i, entry in enumerate(self._entries):
             prev = self._entries[i - 1].entry_hash if i > 0 else self.GENESIS_HASH
             if entry.prev_hash != prev:
                 return False
-
-            raw = json.dumps(
-                {
-                    "seq": entry.sequence,
-                    "ts": entry.timestamp,
-                    "type": entry.event_type,
-                    "payload": entry.payload,
-                    "prev": entry.prev_hash,
-                },
-                sort_keys=True,
-            )
-            if hashlib.sha256(raw.encode()).hexdigest() != entry.entry_hash:
+            if entry.recompute_hash() != entry.entry_hash:
                 return False
-
-            expected_mac = _hmac.new(
-                self._session_key, entry.entry_hash.encode(), hashlib.sha256
-            ).hexdigest()
-            if not _hmac.compare_digest(expected_mac, entry.mac):
+            if not entry.verify_mac(self._session_key):
                 return False
-
         return True
 
     def export_json(self) -> str:

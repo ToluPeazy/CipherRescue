@@ -151,7 +151,7 @@ class Orchestrator:
         return self.context
 
     def abort(self, reason: str = "") -> None:
-        if self.context:
+        if self.context and self.context.state is not SessionState.ABORTED:
             logger.warning(
                 "Session %s aborted: %s", self.context.session_id, reason
             )
