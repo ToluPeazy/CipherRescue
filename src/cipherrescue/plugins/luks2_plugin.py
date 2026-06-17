@@ -19,8 +19,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from ...safety.write_blocker import BackupToken
-from .._base import Action, AuthToken, PluginError, SchemePlugin
+from ..safety.write_blocker import BackupToken
+from . import Action, AuthToken, PluginError, SchemePlugin
 
 logger = logging.getLogger(__name__)
 

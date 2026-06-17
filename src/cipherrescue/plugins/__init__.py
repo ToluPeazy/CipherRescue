@@ -38,8 +38,11 @@ class AuthToken:
     Proof that the operator has successfully authenticated to the scheme.
 
     Issued by SchemePlugin.authenticate().  Required for any action that
-    reads key material or modifies the device.  Zeroed immediately after
-    use via ctypes.memset (see spec §7.2).
+    reads key material or modifies the device.
+
+    Status: credential zeroing (mlock + ctypes.memset per spec §7.2)
+    is not yet implemented.  Scheduled for Phase 1 implementation.
+    Tracked in GitHub issue: CipherRescue Phase 1 — credential zeroing.
     """
 
     scheme: str
