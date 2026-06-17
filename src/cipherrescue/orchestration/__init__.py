@@ -49,7 +49,7 @@ VALID_TRANSITIONS: dict[SessionState, set[SessionState]] = {
     SessionState.ENUMERATE: {SessionState.DETECT, SessionState.ABORTED},
     SessionState.DETECT:    {SessionState.DIAGNOSE, SessionState.ABORTED},
     SessionState.DIAGNOSE:  {SessionState.AUTH, SessionState.ABORTED},
-    SessionState.AUTH:      {SessionState.SELECT, SessionState.DETECT, SessionState.ABORTED},
+    SessionState.AUTH: {SessionState.SELECT, SessionState.DETECT, SessionState.ABORTED},
     SessionState.SELECT:    {SessionState.CONFIRM, SessionState.ABORTED},
     SessionState.CONFIRM:   {SessionState.EXECUTE, SessionState.ABORTED},
     SessionState.EXECUTE:   {SessionState.REPORT, SessionState.ABORTED},
@@ -76,7 +76,8 @@ class SessionContext:
 
     Attributes:
         session_id:      Unique session identifier (UUID4).
-        session_key:     32-byte random key for HMAC signing (audit log + backup tokens).
+        session_key:     32-byte random key for HMAC signing
+                         (audit log + backup tokens).
         state:           Current state machine state.
         device_path:     Target block device path.
         audit_log:       Append-only tamper-evident log for this session.
@@ -115,9 +116,12 @@ class SessionContext:
 
         if target not in permitted:
             self.audit_log.log_rejected_transition(self.state.name, target.name)
+            permitted_names = (
+                ", ".join(s.name for s in permitted) or "none (terminal state)"
+            )
             raise InvalidTransitionError(
                 f"Invalid transition {self.state.name} → {target.name}. "
-                f"Permitted: {', '.join(s.name for s in permitted) or 'none (terminal state)'}."
+                f"Permitted: {permitted_names}."
             )
 
         if target == SessionState.EXECUTE and self.backup_token is None:

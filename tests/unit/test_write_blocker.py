@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import pytest
 
-from cipherrescue.safety.audit_log import Authority
 from cipherrescue.safety.backup_manager import BackupManager
 from cipherrescue.safety.write_blocker import BackupToken, WriteBlocker
 
@@ -102,7 +101,9 @@ class TestWriteBlockerLegitimateFlow:
         token = manager.create_backup(DEVICE_A, SHA256)
         blocker.write_gate(DEVICE_A, token)  # must not raise
 
-    def test_is_write_permitted_false_before_backup(self, blocker: WriteBlocker) -> None:
+    def test_is_write_permitted_false_before_backup(
+        self, blocker: WriteBlocker
+    ) -> None:
         assert blocker.is_write_permitted(DEVICE_A) is False
 
     def test_is_write_permitted_true_after_backup(

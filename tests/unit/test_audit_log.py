@@ -106,7 +106,9 @@ class TestAuditLogHMAC:
 
     def test_wrong_session_key_fails_verify(self):
         """A log verified under a different key must fail (chain not regeneratable)."""
-        log = AuditLog("s1", Authority.DEVICE_OWNER, session_key=b"key-A" + b"\x00" * 27)
+        log = AuditLog(
+            "s1", Authority.DEVICE_OWNER, session_key=b"key-A" + b"\x00" * 27
+        )
         log.log_state_transition("INIT", "ENUMERATE")
 
         # Swap to a different key and re-verify

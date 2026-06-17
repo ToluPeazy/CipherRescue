@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from cipherrescue.stream1 import FDEProfileGenerator, generate_fde_corpus
 from cipherrescue.scpr.types import SCPRInstance
+from cipherrescue.stream1 import FDEProfileGenerator, generate_fde_corpus
 
 
 @pytest.fixture(scope="module")
@@ -73,7 +73,7 @@ class TestReproducibility:
     def test_same_seed_same_corpus(self) -> None:
         c1 = generate_fde_corpus(n=150, seed=42)
         c2 = generate_fde_corpus(n=150, seed=42)
-        for inst1, inst2 in zip(c1, c2):
+        for inst1, inst2 in zip(c1, c2, strict=True):
             assert inst1.universe == inst2.universe
             assert inst1.reasons == inst2.reasons
             assert inst1.costs == inst2.costs
@@ -83,7 +83,7 @@ class TestReproducibility:
         c2 = generate_fde_corpus(n=150, seed=99)
         # At least some instances should differ
         diffs = sum(
-            1 for a, b in zip(c1, c2) if a.universe != b.universe
+            1 for a, b in zip(c1, c2, strict=True) if a.universe != b.universe
         )
         assert diffs > 0
 
