@@ -24,6 +24,7 @@ from __future__ import annotations
 import hashlib
 import hmac as _hmac
 import json
+import threading
 import time
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -88,6 +89,9 @@ class AuditLog:
     Each entry is SHA-256 hash-chained and HMAC'd under the session key K
     (Definition 3.1). verify_chain() checks hash linkage, payload integrity,
     and MAC — the chain is not regeneratable without K.
+
+    session_key must be a non-empty bytes value. An empty key would reduce
+    the HMAC to a publicly reproducible value, allowing full log forgery (F-02).
     """
 
     GENESIS_HASH = "0" * 64
@@ -96,12 +100,18 @@ class AuditLog:
         self,
         session_id: str,
         authority: Authority,
-        session_key: bytes = b"",
+        session_key: bytes,
     ) -> None:
+        if not session_key:
+            raise ValueError(
+                "session_key must be a non-empty bytes value. "
+                "An empty key makes the HMAC publicly reproducible."
+            )
         self.session_id = session_id
         self.authority = authority
         self._session_key = session_key
         self._entries: list[LogEntry] = []
+        self._lock = threading.Lock()
         self._append(
             "SESSION_OPEN",
             {
@@ -111,17 +121,18 @@ class AuditLog:
         )
 
     def _append(self, event_type: str, payload: dict[str, Any]) -> LogEntry:
-        prev = self._entries[-1].entry_hash if self._entries else self.GENESIS_HASH
-        entry = LogEntry(
-            sequence=len(self._entries),
-            timestamp=time.time(),
-            event_type=event_type,
-            payload=payload,
-            prev_hash=prev,
-        )
-        entry.set_mac(self._session_key)
-        self._entries.append(entry)
-        return entry
+        with self._lock:
+            prev = self._entries[-1].entry_hash if self._entries else self.GENESIS_HASH
+            entry = LogEntry(
+                sequence=len(self._entries),
+                timestamp=time.time(),
+                event_type=event_type,
+                payload=payload,
+                prev_hash=prev,
+            )
+            entry.set_mac(self._session_key)
+            self._entries.append(entry)
+            return entry
 
     def log_state_transition(self, from_state: str, to_state: str) -> None:
         self._append("STATE_TRANSITION", {"from": from_state, "to": to_state})

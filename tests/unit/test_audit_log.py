@@ -18,8 +18,7 @@ SESSION_KEY = b"test-key-32-bytes-padded-xxxxxxx"
 
 @pytest.fixture
 def log() -> AuditLog:
-    # session_key defaults to b"" — existing tests pass without modification.
-    return AuditLog("test-session-001", Authority.DEVICE_OWNER)
+    return AuditLog("test-session-001", Authority.DEVICE_OWNER, session_key=SESSION_KEY)
 
 
 class TestAuditLog:
@@ -137,13 +136,12 @@ class TestAuditLogHMAC:
         entry.mac = entry.mac[:-1] + ("0" if original_last != "0" else "1")
         assert log.verify_chain() is False
 
-    def test_default_session_key_backward_compat(self):
-        """
-        AuditLog(session_key=b'') must still produce MACs and verify correctly
-        (guards the backward-compatibility contract for callers that omit the key).
-        """
-        log = AuditLog("s1", Authority.DEVICE_OWNER)  # session_key defaults to b""
-        log.log_state_transition("INIT", "ENUMERATE")
-        data = json.loads(log.export_json())
-        assert all("mac" in e and len(e["mac"]) == 64 for e in data)
-        assert log.verify_chain() is True
+    def test_empty_session_key_raises(self):
+        """Empty session_key must be rejected — it makes HMAC publicly reproducible."""
+        with pytest.raises(ValueError, match="non-empty"):
+            AuditLog("s1", Authority.DEVICE_OWNER, session_key=b"")
+
+    def test_missing_session_key_raises(self):
+        """session_key is now a required argument with no default."""
+        with pytest.raises(TypeError):
+            AuditLog("s1", Authority.DEVICE_OWNER)  # type: ignore[call-arg]

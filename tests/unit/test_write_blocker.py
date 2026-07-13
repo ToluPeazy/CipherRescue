@@ -118,3 +118,43 @@ class TestWriteBlockerLegitimateFlow:
         manager.create_backup(DEVICE_A, SHA256)
         assert blocker.is_write_permitted(DEVICE_A) is True
         assert blocker.is_write_permitted(DEVICE_B) is False
+
+
+class TestTokenIdentityCheck:
+    """write_gate() must reject a token that differs from the registered one (F-04)."""
+
+    def test_different_valid_token_rejected(self, blocker: WriteBlocker) -> None:
+        # Issue T1, then re-issue T2 for the same device (different timestamp).
+        manager = BackupManager(blocker, SESSION_KEY, SESSION_ID)
+        manager.create_backup(DEVICE_A, SHA256)  # T1 registered
+
+        # Build T2: same fields but signed at a different timestamp → different HMAC.
+        t2 = BackupToken.create_signed(
+            session_key=SESSION_KEY,
+            session_id=SESSION_ID,
+            device_path=DEVICE_A,
+            backup_sha256=SHA256,
+            timestamp=0.0,  # distinct timestamp forces a different HMAC
+        )
+        # T2 has a valid HMAC under the session key but was not the registered token.
+        with pytest.raises(PermissionError, match="does not match the registered"):
+            blocker.write_gate(DEVICE_A, t2)
+
+
+class TestDevicePathValidation:
+    """BackupManager must reject invalid or dangerous device paths (F-03)."""
+
+    def test_non_dev_path_rejected(self, blocker: WriteBlocker) -> None:
+        manager = BackupManager(blocker, SESSION_KEY, SESSION_ID)
+        with pytest.raises(ValueError, match="Invalid device path"):
+            manager.create_backup("/etc/passwd", SHA256)
+
+    def test_relative_path_rejected(self, blocker: WriteBlocker) -> None:
+        manager = BackupManager(blocker, SESSION_KEY, SESSION_ID)
+        with pytest.raises(ValueError, match="Invalid device path"):
+            manager.create_backup("dev/sda", SHA256)
+
+    def test_valid_dev_path_accepted(self, blocker: WriteBlocker) -> None:
+        manager = BackupManager(blocker, SESSION_KEY, SESSION_ID)
+        token = manager.create_backup(DEVICE_A, SHA256)
+        assert token.device_path == DEVICE_A

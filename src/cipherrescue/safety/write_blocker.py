@@ -47,11 +47,20 @@ class BackupToken:
     hmac: str
 
     def _message(self) -> bytes:
-        """Single source of truth for the HMAC message field ordering."""
-        return (
-            f"{self.session_id}|{self.device_path}|"
-            f"{self.backup_sha256}|{self.timestamp}"
-        ).encode()
+        """Single source of truth for the HMAC message field ordering.
+
+        Fields are length-prefixed (4-byte big-endian uint) to prevent
+        separator-collision attacks: pipe-delimited strings are ambiguous when
+        fields themselves may contain the separator character (F-01).
+        Timestamp is serialised at 6 d.p. for cross-platform consistency (F-05).
+        """
+        parts = [
+            self.session_id,
+            self.device_path,
+            self.backup_sha256,
+            f"{self.timestamp:.6f}",
+        ]
+        return b"".join(len(p).to_bytes(4, "big") + p.encode() for p in parts)
 
     def verify(self, session_key: bytes) -> None:
         """
@@ -124,7 +133,16 @@ class WriteBlocker:
         self._issued_tokens: dict[str, BackupToken] = {}
 
     def register_token(self, token: BackupToken) -> None:
-        """Register a BackupToken issued by BackupManager."""
+        """Register a BackupToken issued by BackupManager.
+
+        Logs a warning if a token for this device already exists, since
+        silent replacement could mask a double-backup flow (F-12).
+        """
+        if token.device_path in self._issued_tokens:
+            logger.warning(
+                "WriteBlocker: replacing existing registered token for %s",
+                token.device_path,
+            )
         self._issued_tokens[token.device_path] = token
 
     def _check_device_path(self, device_path: str, token: BackupToken) -> None:
@@ -132,13 +150,6 @@ class WriteBlocker:
             raise ValueError(
                 f"Token device {token.device_path!r} does not match "
                 f"target device {device_path!r}."
-            )
-
-    def _check_registered(self, device_path: str) -> None:
-        if self._issued_tokens.get(device_path) is None:
-            raise PermissionError(
-                f"No registered backup token for {device_path!r}. "
-                "BackupManager.create_backup() must be called first."
             )
 
     def write_gate(self, device_path: str, token: BackupToken) -> None:
@@ -149,7 +160,9 @@ class WriteBlocker:
           1. Token device path matches the requested target.
           2. Token was registered by BackupManager for this session
              (a structurally valid but never-issued token is rejected).
-          3. HMAC recomputed under the session key matches the token's hmac
+          3. Presented token is identical to the registered token by HMAC
+             comparison, preventing token-swap attacks (F-04).
+          4. HMAC recomputed under the session key matches the token's hmac
              (a token forged or signed under a different key is rejected).
 
         Args:
@@ -158,10 +171,21 @@ class WriteBlocker:
 
         Raises:
             ValueError:      If the token device path does not match.
-            PermissionError: If no registered token exists or HMAC is invalid.
+            PermissionError: If no registered token exists, token identity
+                             check fails, or HMAC is invalid.
         """
         self._check_device_path(device_path, token)
-        self._check_registered(device_path)
+        registered = self._issued_tokens.get(device_path)
+        if registered is None:
+            raise PermissionError(
+                f"No registered backup token for {device_path!r}. "
+                "BackupManager.create_backup() must be called first."
+            )
+        if not _hmac.compare_digest(registered.hmac, token.hmac):
+            raise PermissionError(
+                f"Presented token for {device_path!r} does not match "
+                "the registered token."
+            )
         token.verify(self._session_key)
 
         logger.info(

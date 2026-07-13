@@ -106,7 +106,6 @@ class SchemePlugin(abc.ABC):
         The list should be ordered by risk level (lowest first).
         """
 
-    @abc.abstractmethod
     def execute_action(
         self,
         device_path: str,
@@ -117,8 +116,31 @@ class SchemePlugin(abc.ABC):
         """
         Execute the selected recovery action.
 
-        MUST call self._wb.write_gate(device_path, backup_token) before
-        any write operation (Contract clause C4).
+        Enforces write_gate for any action where requires_backup is True,
+        ensuring Contract clause C4 is honoured by the engine rather than
+        relying on each plugin implementation to call write_gate (F-10).
+        Delegates scheme-specific logic to _do_execute_action().
+
+        Raises:
+            PluginError: On failure.
+        """
+        if action.requires_backup:
+            self._wb.write_gate(device_path, backup_token)
+        return self._do_execute_action(device_path, token, backup_token, action)
+
+    @abc.abstractmethod
+    def _do_execute_action(
+        self,
+        device_path: str,
+        token: AuthToken,
+        backup_token: BackupToken,
+        action: Action,
+    ) -> dict[str, Any]:
+        """
+        Scheme-specific execution logic. Called by execute_action().
+
+        write_gate() has already been called for actions where
+        requires_backup is True — do not call it again here.
 
         Returns:
             A dict of result metadata logged to the AuditLog.

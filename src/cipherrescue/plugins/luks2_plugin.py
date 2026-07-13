@@ -61,15 +61,15 @@ class LUKS2Plugin(SchemePlugin):
             ),
         ]
 
-    def execute_action(
+    def _do_execute_action(
         self,
         device_path: str,
         token: AuthToken,
         backup_token: BackupToken,
         action: Action,
     ) -> dict[str, Any]:
-        if action.requires_backup:
-            self._wb.write_gate(device_path, backup_token)
+        # write_gate() has already been called by SchemePlugin.execute_action()
+        # for actions where requires_backup is True.
         raise PluginError(
-            f"LUKS2Plugin.execute_action({action.name!r}): not yet implemented"
+            f"LUKS2Plugin._do_execute_action({action.name!r}): not yet implemented"
         )
