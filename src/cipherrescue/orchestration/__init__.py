@@ -12,6 +12,8 @@ State invariants enforced by transition():
     - Any state may transition to ABORTED.
     - ABORTED is a terminal state — no transitions out.
     - Every permitted and rejected transition is logged to AuditLog.
+    - AUTH → DETECT (failure path) is limited to MAX_AUTH_ATTEMPTS before
+      locking the session; only ABORTED is then permitted (F-09).
 
 Reference: spec §6 (Layer 6 — Orchestration Engine), Theorem 6.1
            (Orchestration Safety Property).
@@ -25,8 +27,11 @@ import uuid
 from enum import Enum, auto
 
 from ..safety.audit_log import AuditLog, Authority
+from ..safety.credentials import SecureBuffer
 
 logger = logging.getLogger(__name__)
+
+MAX_AUTH_ATTEMPTS = 5
 
 
 class SessionState(Enum):
@@ -76,8 +81,6 @@ class SessionContext:
 
     Attributes:
         session_id:      Unique session identifier (UUID4).
-        session_key:     32-byte random key for HMAC signing
-                         (audit log + backup tokens).
         state:           Current state machine state.
         device_path:     Target block device path.
         audit_log:       Append-only tamper-evident log for this session.
@@ -89,16 +92,27 @@ class SessionContext:
 
     def __init__(self, authority: Authority) -> None:
         self.session_id = str(uuid.uuid4())
-        self.session_key: bytes = os.urandom(32)
+        # Session key is mlock-backed and zeroed on abort (F-06).
+        self._session_key_buf: SecureBuffer = SecureBuffer(os.urandom(32))
         self.state = SessionState.INIT
         self.device_path: str = ""
         self.audit_log = AuditLog(
-            self.session_id, authority, session_key=self.session_key
+            self.session_id, authority, session_key=self._session_key_buf.value
         )
         self.diagnosis = None
         self.auth_token = None
         self.backup_token = None
         self.selected_action = None
+        self._auth_attempts: int = 0
+
+    @property
+    def session_key(self) -> bytes:
+        """Return the session key bytes. Empty after zero_key() is called."""
+        return self._session_key_buf.value
+
+    def zero_key(self) -> None:
+        """Explicitly zero the session key. Called by Orchestrator.abort()."""
+        self._session_key_buf.zero()
 
     def transition(self, target: SessionState) -> None:
         """
@@ -106,7 +120,9 @@ class SessionContext:
 
         Raises:
             InvalidTransitionError:   If target is not in the permitted
-                                      successor set for the current state.
+                                      successor set for the current state,
+                                      or if auth is locked after too many
+                                      failed attempts (F-09).
             MissingBackupTokenError:  If transitioning to EXECUTE without
                                       a registered backup_token (Theorem 6.1).
 
@@ -130,6 +146,16 @@ class SessionContext:
                 "Cannot transition to EXECUTE: backup_token is None. "
                 "BackupManager.create_backup() must complete before execution."
             )
+
+        # AUTH → DETECT is the auth-failure path; enforce rate limit (F-09).
+        if self.state == SessionState.AUTH and target == SessionState.DETECT:
+            self._auth_attempts += 1
+            if self._auth_attempts >= MAX_AUTH_ATTEMPTS:
+                self.audit_log.log_rejected_transition(self.state.name, target.name)
+                raise InvalidTransitionError(
+                    f"Authentication locked after {MAX_AUTH_ATTEMPTS} failed "
+                    "attempts. Only ABORTED is now permitted."
+                )
 
         logger.info(
             "Session %s: %s → %s", self.session_id, self.state.name, target.name
@@ -158,3 +184,4 @@ class Orchestrator:
         if self.context and self.context.state is not SessionState.ABORTED:
             logger.warning("Session %s aborted: %s", self.context.session_id, reason)
             self.context.transition(SessionState.ABORTED)
+            self.context.zero_key()

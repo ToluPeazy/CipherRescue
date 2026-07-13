@@ -15,12 +15,39 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
+import re
 import subprocess
 from pathlib import Path
 
 from .write_blocker import BackupToken, WriteBlocker
 
 logger = logging.getLogger(__name__)
+
+# Only /dev/<alphanumeric-or-slash-or-dash> paths are valid block devices (F-03).
+_DEVICE_RE = re.compile(r"^/dev/[a-zA-Z0-9][a-zA-Z0-9/_-]*$")
+
+# Backup images must not target sensitive virtual or system filesystems (F-07).
+_FORBIDDEN_DEST_PREFIXES = ("/proc", "/sys", "/dev", "/etc", "/boot")
+
+
+def _validate_device_path(device_path: str) -> None:
+    """Raise ValueError if device_path is not a safe block-device path."""
+    if not _DEVICE_RE.match(device_path):
+        raise ValueError(f"Invalid device path {device_path!r}: must be /dev/<name>.")
+    if os.path.islink(device_path):
+        raise ValueError(f"Device path must not be a symlink: {device_path!r}")
+
+
+def _validate_backup_dest(backup_dest: str) -> None:
+    """Raise ValueError if backup_dest resolves to a forbidden system path."""
+    resolved = os.path.realpath(backup_dest)
+    for prefix in _FORBIDDEN_DEST_PREFIXES:
+        if resolved == prefix or resolved.startswith(prefix + os.sep):
+            raise ValueError(
+                f"Backup destination {backup_dest!r} resolves to a forbidden "
+                f"path: {resolved!r}"
+            )
 
 
 class BackupError(Exception):
@@ -64,6 +91,7 @@ class BackupManager:
         Returns:
             Registered BackupToken.
         """
+        _validate_device_path(device_path)
         token = BackupToken.create_signed(
             session_key=self._session_key,
             session_id=self._session_id,
@@ -97,7 +125,10 @@ class BackupManager:
 
         Raises:
             BackupError: If ddrescue fails or is not installed.
+            ValueError:  If device_path or backup_dest are invalid.
         """
+        _validate_device_path(device_path)
+        _validate_backup_dest(backup_dest)
         mapfile = backup_dest + ".map"
         logger.info(
             "BackupManager: starting ddrescue %s → %s", device_path, backup_dest
@@ -136,9 +167,16 @@ class BackupManager:
 
 
 def _sha256_file(path: str) -> str:
-    """Compute SHA-256 hex digest of a file, reading in 4 MiB chunks."""
+    """Compute SHA-256 hex digest of a file, reading in 4 MiB chunks.
+
+    Raises ValueError if the path is not a regular file, blocking reads from
+    special files such as /dev/zero that would loop indefinitely (F-11).
+    """
+    p = Path(path)
+    if not p.is_file():
+        raise ValueError(f"Backup destination is not a regular file: {path!r}")
     h = hashlib.sha256()
-    with Path(path).open("rb") as f:
+    with p.open("rb") as f:
         for chunk in iter(lambda: f.read(4 * 1024 * 1024), b""):
             h.update(chunk)
     return h.hexdigest()

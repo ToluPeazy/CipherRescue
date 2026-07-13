@@ -126,6 +126,65 @@ class TestFullPath:
         assert ctx.state == SessionState.DETECT
 
 
+class TestAuthRateLimit:
+    """AUTH→DETECT (failure path) must be blocked after MAX_AUTH_ATTEMPTS."""
+
+    def _walk_to_auth(self, ctx: SessionContext) -> None:
+        for s in [
+            SessionState.ENUMERATE,
+            SessionState.DETECT,
+            SessionState.DIAGNOSE,
+            SessionState.AUTH,
+        ]:
+            ctx.transition(s)
+
+    def _cycle_auth_failure(self, ctx: SessionContext) -> None:
+        """One AUTH failure cycle: AUTH → DETECT → DIAGNOSE → AUTH."""
+        ctx.transition(SessionState.DETECT)
+        ctx.transition(SessionState.DIAGNOSE)
+        ctx.transition(SessionState.AUTH)
+
+    def test_first_four_failures_allowed(self) -> None:
+        from cipherrescue.orchestration import MAX_AUTH_ATTEMPTS
+
+        ctx = SessionContext(Authority.DEVICE_OWNER)
+        self._walk_to_auth(ctx)
+
+        for _ in range(MAX_AUTH_ATTEMPTS - 1):
+            self._cycle_auth_failure(ctx)
+
+        assert ctx.state == SessionState.AUTH
+
+    def test_max_failures_locks_session(self) -> None:
+        from cipherrescue.orchestration import MAX_AUTH_ATTEMPTS
+
+        ctx = SessionContext(Authority.DEVICE_OWNER)
+        self._walk_to_auth(ctx)
+
+        for _ in range(MAX_AUTH_ATTEMPTS - 1):
+            self._cycle_auth_failure(ctx)
+
+        # The Nth failure attempt must raise.
+        with pytest.raises(InvalidTransitionError, match="locked"):
+            ctx.transition(SessionState.DETECT)
+
+    def test_abort_still_allowed_after_lock(self) -> None:
+        from cipherrescue.orchestration import MAX_AUTH_ATTEMPTS
+
+        ctx = SessionContext(Authority.DEVICE_OWNER)
+        self._walk_to_auth(ctx)
+
+        for _ in range(MAX_AUTH_ATTEMPTS - 1):
+            self._cycle_auth_failure(ctx)
+
+        with pytest.raises(InvalidTransitionError):
+            ctx.transition(SessionState.DETECT)
+
+        # ABORTED must still be reachable even after the lock triggers.
+        ctx.transition(SessionState.ABORTED)
+        assert ctx.state == SessionState.ABORTED
+
+
 class TestAuditLogOnRejection:
     def test_rejected_transition_logged(self, ctx: SessionContext) -> None:
         with pytest.raises(InvalidTransitionError):
